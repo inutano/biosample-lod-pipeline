@@ -13,6 +13,29 @@ touch ${LOGFILE}
 
 ### Functions
 
+message() {
+  case $2 in
+    green|success)
+      COLOR="92m";
+      ;;
+    yellow|warning)
+      COLOR="93m";
+      ;;
+    red|danger)
+      COLOR="91m";
+      ;;
+    blue|info)
+      COLOR="96m";
+      ;;
+    *)
+      COLOR="0m"
+      ;;
+  esac
+  STARTCOLOR="\e[$COLOR";
+  ENDCOLOR="\e[0m";
+  printf "$STARTCOLOR%b$ENDCOLOR" "$1";
+}
+
 #
 # Test ttl generator
 #
@@ -24,12 +47,12 @@ test_ttl_generator() {
   num_lines=$(wc -l ${wdir}/*ttl)
 
   if [[ -z ${ttl_files} ]]; then
-    echo "generate_${item_name}: FAILED"
-    echo "  files: ${ttl_files}"
-    echo "  number of lines: ${num_lines}"
+    message "generate_${item_name}: FAILED\n" "danger"
+    message "  files: ${ttl_files}\n"
+    message "  number of lines: ${num_lines}\n"
     FAILED+=(${item_name})
   else
-    echo "generate_${item_name}: SUCCESS"
+    message "generate_${item_name}: SUCCESS\n" "info"
   fi
 }
 
@@ -38,7 +61,7 @@ test_ttl_generator() {
 #
 generate_biosample() {
   local wdir=${WORKDIR}/biosample
-  mkdir -p  ${wdir}
+  mkdir -p ${wdir}
   #touch ${wdir}/biosample.ttl
   echo ${wdir}
 }
@@ -52,8 +75,8 @@ test_generate_biosample() {
 # Create SRA accessions RDF: Run accessions-ttl-generator-split
 #
 generate_accessions() {
-  local dir=${WORKDIR}/accessions
-  mkdir -p  ${wdir}
+  local wdir=${WORKDIR}/accessions
+  mkdir -p ${wdir}
   #touch ${wdir}/accessions.ttl
   echo ${wdir}
 }
@@ -68,7 +91,7 @@ test_generate_accessions() {
 #
 generate_experiment() {
   local wdir=${WORKDIR}/experiment
-  mkdir -p  ${wdir}
+  mkdir -p ${wdir}
   #touch ${wdir}/experiment.ttl
   echo ${wdir}
 }
@@ -83,7 +106,7 @@ test_generate_experiment() {
 #
 load_to_virtuoso() {
   local wdir=${WORKDIR}/virtuoso
-  mkdir -p  ${wdir}
+  mkdir -p ${wdir}
   virtuoso_db_path=${wdir}/virtuoso.db
   #touch ${virtuoso_db_path}
   echo ${virtuoso_db_path}
@@ -93,12 +116,12 @@ test_load_to_virtuoso() {
   local db_path=$(load_to_virtuoso)
   local db_size=$(ls -l ${db_path} | awk '{ print $5 }')
   if [[ ${db_size} -lt 70000000 ]]; then
-    echo "load_to_virtuoso: FAILED"
-    echo "  db size: ${db_size}"
+    message "load_to_virtuoso: FAILED\n" "danger"
+    message "  db size: ${db_size}\n"
     FAILED+=(load_to_virtuoso)
   else
-    echo "load_to_virtuoso: SUCCESS"
-    echo "  db size: ${db_size}"
+    message "load_to_virtuoso: SUCCESS\n" "info"
+    message "  db size: ${db_size}\n"
   fi
 }
 
@@ -117,13 +140,13 @@ test_publish_virtuoso_db() {
   local dest_http_status=$(curl -s -o /dev/null -LI ${dest_path} -w '%{http_code}\n')
   local dest_file_size=$(curl -s -o /dev/null -LI ${dest_path} -w '%{size_download}\n')
   if [[ ${dest_http_status} != 200 ]]; then
-    echo "publish_virtuoso_db: FAILED"
-    echo "  http status:      ${dest_http_status}"
-    echo "  remote file size: ${dest_file_size}"
+    message "publish_virtuoso_db: FAILED\n" "danger"
+    message "  http status:      ${dest_http_status}\n"
+    message "  remote file size: ${dest_file_size}\n"
     FAILED+=(publish_virtuoso_db)
   else
-    echo "mirror_virtuoso_db: SUCCESS"
-    echo "  remote file size: ${dest_file_size}"
+    message "mirror_virtuoso_db: SUCCESS\n" "info"
+    message "  remote file size: ${dest_file_size}\n"
   fi
 }
 
@@ -137,13 +160,13 @@ test() {
   test_load_to_virtuoso
   test_publish_virtuoso_db
 
-  if [[ -z ${FAILED} ]]; then
+  if [[ ${#FAILED[@]} -ne 0 ]]; then
     for i in "${FAILED[@]}"; do
-      echo "Test ${i} failed."
+      message "Test ${i} failed.\n" "danger"
     done
     exit 1
   else
-    echo "Passed all test."
+    message "Passed all test.\n" "info"
   fi
 }
 
@@ -159,6 +182,7 @@ main() {
 case ${1} in
   test)
     test
+    ;;
   *)
     main
     ;;
