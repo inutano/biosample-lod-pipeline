@@ -52,7 +52,7 @@ test_ttl_generator() {
   num_ttl_files=$(ls ${wdir}/*ttl | wc -l | awk '$0=$1')
   num_lines=$(wc -l ${wdir}/*ttl)
 
-  if [[ -z ${ttl_files} ]]; then
+  if [[ -z ${num_ttl_files} ]]; then
     message "generate_${item_name}: FAILED\n" "danger" | tee -a ${LOGFILE}
     message "  number of files: ${num_ttl_files}\n" | tee -a ${LOGFILE}
     message "  number of lines: ${num_lines}\n" | tee -a ${LOGFILE}
@@ -70,7 +70,7 @@ test_ttl_generator() {
 generate_biosample() {
   local wdir=${WORKDIR}/biosample
   mkdir -p ${wdir}
-  #touch ${wdir}/biosample.ttl
+  touch ${wdir}/biosample.ttl
   echo ${wdir}
 }
 
@@ -85,7 +85,7 @@ test_generate_biosample() {
 generate_accessions() {
   local wdir=${WORKDIR}/accessions
   mkdir -p ${wdir}
-  #touch ${wdir}/accessions.ttl
+  touch ${wdir}/accessions.ttl
   echo ${wdir}
 }
 
@@ -100,7 +100,7 @@ test_generate_accessions() {
 generate_experiment() {
   local wdir=${WORKDIR}/experiment
   mkdir -p ${wdir}
-  #touch ${wdir}/experiment.ttl
+  touch ${wdir}/experiment.ttl
   echo ${wdir}
 }
 
@@ -116,7 +116,7 @@ load_to_virtuoso() {
   local wdir=${WORKDIR}/virtuoso
   mkdir -p ${wdir}
   virtuoso_db_path=${wdir}/virtuoso.db
-  #touch ${virtuoso_db_path}
+  dd if=/dev/urandom of=${virtuoso_db_path} bs=1M count=71
   echo ${virtuoso_db_path}
 }
 
@@ -139,7 +139,7 @@ test_load_to_virtuoso() {
 publish_virtuoso_db() {
   local db_file="${WORKDIR}/virtuoso/virtuoso.db"
   local dest_path="${WORKDIR}/dest"
-  echo ${dest_path}
+  echo "https://dbcls.rois.ac.jp"
 }
 
 test_publish_virtuoso_db() {
