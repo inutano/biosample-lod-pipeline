@@ -1,18 +1,9 @@
 #!/bin/bash
 
 ### Env Vars
-
-# working directory
-WORKDIR="/data1/inutano/work/biosample-lod/$(date +%Y%m%d-%H%M)"
-mkdir -p ${WORKDIR}
-cd ${WORKDIR}
-
-# log file
-LOGFILE="${WORKDIR}/biosample-lod.log"
-touch ${LOGFILE}
+WORKDIR_BASE="/data1/inutano/work"
 
 ### Functions
-
 message() {
   case $2 in
     green|success)
@@ -37,22 +28,39 @@ message() {
 }
 
 #
+# Setup working directory and log file
+#
+setup() {
+  WORKDIR="${WORKDIR_BASE}/biosample-lod/$(date +%Y%m%d-%H%M)"
+  mkdir -p ${WORKDIR}
+
+  LOGFILE="${WORKDIR}/biosample-lod.log"
+  touch ${LOGFILE}
+
+  cd ${WORKDIR}
+  message "Setup working directory: ${WORKDIR}\n"
+  message "Setup log file: ${LOGFILE}\n"
+}
+
+#
 # Test ttl generator
 #
 test_ttl_generator() {
   local item_name=${1}
   local wdir=${2}
 
-  ttl_files=$(ls ${wdir}/*ttl)
+  num_ttl_files=$(ls ${wdir}/*ttl | wc -l | awk '$0=$1')
   num_lines=$(wc -l ${wdir}/*ttl)
 
   if [[ -z ${ttl_files} ]]; then
-    message "generate_${item_name}: FAILED\n" "danger"
-    message "  files: ${ttl_files}\n"
-    message "  number of lines: ${num_lines}\n"
+    message "generate_${item_name}: FAILED\n" "danger" | tee -a ${LOGFILE}
+    message "  number of files: ${num_ttl_files}\n" | tee -a ${LOGFILE}
+    message "  number of lines: ${num_lines}\n" | tee -a ${LOGFILE}
     FAILED+=(${item_name})
   else
-    message "generate_${item_name}: SUCCESS\n" "info"
+    message "generate_${item_name}: SUCCESS\n" "info" | tee -a ${LOGFILE}
+    message "  number of files: ${num_ttl_files}\n" | tee -a ${LOGFILE}
+    message "  number of lines: ${num_lines}\n" | tee -a ${LOGFILE}
   fi
 }
 
@@ -116,12 +124,12 @@ test_load_to_virtuoso() {
   local db_path=$(load_to_virtuoso)
   local db_size=$(ls -l ${db_path} | awk '{ print $5 }')
   if [[ ${db_size} -lt 70000000 ]]; then
-    message "load_to_virtuoso: FAILED\n" "danger"
-    message "  db size: ${db_size}\n"
+    message "load_to_virtuoso: FAILED\n" "danger" | tee -a ${LOGFILE}
+    message "  db size: ${db_size}\n" | tee -a ${LOGFILE}
     FAILED+=(load_to_virtuoso)
   else
-    message "load_to_virtuoso: SUCCESS\n" "info"
-    message "  db size: ${db_size}\n"
+    message "load_to_virtuoso: SUCCESS\n" "info" | tee -a ${LOGFILE}
+    message "  db size: ${db_size}\n" | tee -a ${LOGFILE}
   fi
 }
 
@@ -131,7 +139,6 @@ test_load_to_virtuoso() {
 publish_virtuoso_db() {
   local db_file="${WORKDIR}/virtuoso/virtuoso.db"
   local dest_path="${WORKDIR}/dest"
-  # scp ${db_file} ${dest_path}
   echo ${dest_path}
 }
 
@@ -140,13 +147,13 @@ test_publish_virtuoso_db() {
   local dest_http_status=$(curl -s -o /dev/null -LI ${dest_path} -w '%{http_code}\n')
   local dest_file_size=$(curl -s -o /dev/null -LI ${dest_path} -w '%{size_download}\n')
   if [[ ${dest_http_status} != 200 ]]; then
-    message "publish_virtuoso_db: FAILED\n" "danger"
-    message "  http status:      ${dest_http_status}\n"
-    message "  remote file size: ${dest_file_size}\n"
+    message "publish_virtuoso_db: FAILED\n" "danger" | tee -a ${LOGFILE}
+    message "  http status:      ${dest_http_status}\n" | tee -a ${LOGFILE}
+    message "  remote file size: ${dest_file_size}\n" | tee -a ${LOGFILE}
     FAILED+=(publish_virtuoso_db)
   else
-    message "mirror_virtuoso_db: SUCCESS\n" "info"
-    message "  remote file size: ${dest_file_size}\n"
+    message "mirror_virtuoso_db: SUCCESS\n" "info" | tee -a ${LOGFILE}
+    message "  remote file size: ${dest_file_size}\n" | tee -a ${LOGFILE}
   fi
 }
 
@@ -154,6 +161,7 @@ test_publish_virtuoso_db() {
 # Generalfunction
 #
 test() {
+  setup
   test_generate_biosample
   test_generate_accessions
   test_generate_experiment
@@ -162,15 +170,16 @@ test() {
 
   if [[ ${#FAILED[@]} -ne 0 ]]; then
     for i in "${FAILED[@]}"; do
-      message "Test ${i} failed.\n" "danger"
+      message "Test ${i} failed.\n" "danger" | tee -a ${LOGFILE}
     done
     exit 1
   else
-    message "Passed all test.\n" "info"
+    message "Passed all test.\n" "info" | tee -a ${LOGFILE}
   fi
 }
 
 main() {
+  setup
   generate_biosample
   generate_accessions
   generate_experiment
