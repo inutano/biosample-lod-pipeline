@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ### Env Vars
-WORKDIR_BASE="/data1/inutano/work"
+WORKDIR_BASE="${HOME}/work/"
 
 ### Functions
 message() {
@@ -24,7 +24,7 @@ message() {
   esac
   STARTCOLOR="\e[$COLOR";
   ENDCOLOR="\e[0m";
-  printf "$STARTCOLOR%b$ENDCOLOR" "$1";
+  printf "$STARTCOLOR%b$ENDCOLOR" "[$(date +'%Y/%m/%d %H:%M:%S')] $1";
 }
 
 #
@@ -50,17 +50,17 @@ test_ttl_generator() {
   local wdir=${2}
 
   num_ttl_files=$(ls ${wdir}/*ttl | wc -l | awk '$0=$1')
-  num_lines=$(wc -l ${wdir}/*ttl)
+  num_lines=$(wc -l ${wdir}/*ttl | sort | head)
 
   if [[ -z ${num_ttl_files} ]]; then
     message "generate_${item_name}: FAILED\n" "danger" | tee -a ${LOGFILE}
     message "  number of files: ${num_ttl_files}\n" | tee -a ${LOGFILE}
-    message "  number of lines: ${num_lines}\n" | tee -a ${LOGFILE}
+    message "  number of lines (smallest 10 files):\n${num_lines}\n" | tee -a ${LOGFILE}
     FAILED+=(${item_name})
   else
     message "generate_${item_name}: SUCCESS\n" "info" | tee -a ${LOGFILE}
     message "  number of files: ${num_ttl_files}\n" | tee -a ${LOGFILE}
-    message "  number of lines: ${num_lines}\n" | tee -a ${LOGFILE}
+    message "  number of lines (smallest 10 files):\n${num_lines}\n" | tee -a ${LOGFILE}
   fi
 }
 
@@ -69,9 +69,10 @@ test_ttl_generator() {
 #
 generate_biosample() {
   local wdir=${WORKDIR}/biosample
-  mkdir -p ${wdir}
-  touch ${wdir}/biosample.ttl
-  echo ${wdir}
+  git clone 'git://github.com/inutano/biosample_jsonld' -b 'v1.9' --depth 1 ${wdir}
+  cd ${wdir}
+  run_biosample=$(bash ./sh/biosample.run.sh ${wdir})
+  echo "${wdir}/ttl"
 }
 
 test_generate_biosample() {
