@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ### Env Vars
-WORKDIR_BASE="${HOME}/work/"
+WORKDIR_BASE="${HOME}/work"
 
 ### Functions
 message() {
