@@ -117,10 +117,17 @@ test_generate_experiment() {
 #
 load_to_virtuoso() {
   local wdir=${WORKDIR}/virtuoso
-  mkdir -p ${wdir}
-  virtuoso_db_path=${wdir}/virtuoso.db
-  dd if=/dev/urandom of=${virtuoso_db_path} bs=1M count=71
-  echo ${virtuoso_db_path}
+  git clone 'git://github.com/inutano/ttl2virtuosodb' -b 'v1.0' --depth 1 ${wdir}
+  cd ${wdir}
+
+  mkdir -p "${wdir}/data"
+  find ${WORKDIR} -name 'ttl' -type d | while read ttl_dir; do
+    find "${ttl_dir}" -name '*ttl' -type f | xargs mv -t "${wdir}/data"
+  done
+
+  ./ttl2virtuosodb load
+
+  echo ${wdir}/db/virtuoso.db
 }
 
 test_load_to_virtuoso() {
