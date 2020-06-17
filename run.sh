@@ -50,7 +50,7 @@ test_ttl_generator() {
   local wdir=${2}
 
   num_ttl_files=$(ls ${wdir}/*ttl | wc -l | awk '$0=$1')
-  num_lines=$(wc -l ${wdir}/*ttl | sort | head)
+  num_lines=$(wc -l ${wdir}/*ttl | sort -n | head)
 
   if [[ -z ${num_ttl_files} ]]; then
     message "generate_${item_name}: FAILED\n" "danger" | tee -a ${LOGFILE}
@@ -85,9 +85,10 @@ test_generate_biosample() {
 #
 generate_accessions() {
   local wdir=${WORKDIR}/accessions
-  mkdir -p ${wdir}
-  touch ${wdir}/accessions.ttl
-  echo ${wdir}
+  git clone 'git://github.com/inutano/insdc-accessions' -b 'v1.1' --depth 1 ${wdir}
+  cd ${wdir}
+  run_accessions=$(bash ./bin/accessions-ttl-generator-split ${wdir})
+  echo "${wdir}/ttl"
 }
 
 test_generate_accessions() {
