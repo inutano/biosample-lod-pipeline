@@ -117,7 +117,7 @@ test_generate_experiment() {
 #
 load_to_virtuoso() {
   local wdir=${WORKDIR}/virtuoso
-  git clone 'git://github.com/inutano/ttl2virtuosodb' -b 'v1.0' --depth 1 ${wdir}
+  git clone 'git://github.com/inutano/ttl2virtuosodb' -b 'v0.5.0' --depth 1 ${wdir}
   cd ${wdir}
 
   mkdir -p "${wdir}/data"
@@ -125,7 +125,7 @@ load_to_virtuoso() {
     find "${ttl_dir}" -name '*ttl' -type f | xargs mv -t "${wdir}/data"
   done
 
-  ./ttl2virtuosodb load
+  turtle_load=$(./ttl2virtuosodb load)
 
   echo ${wdir}/db/virtuoso.db
 }
