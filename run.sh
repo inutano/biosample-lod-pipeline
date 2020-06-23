@@ -126,6 +126,7 @@ load_to_virtuoso() {
   done
 
   turtle_load=$(./ttl2virtuosodb load)
+  virtuoso_down=$(./ttl2virtuosodb down)
 
   echo ${wdir}/db/virtuoso.db
 }
