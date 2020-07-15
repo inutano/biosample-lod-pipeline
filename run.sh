@@ -193,7 +193,7 @@ main() {
   setup
   generate_biosample
   generate_accessions
-  generate_experiment
+  # generate_experiment # Under construction
   load_to_virtuoso
   publish_virtuoso_db
 }
