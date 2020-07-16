@@ -4,11 +4,10 @@ set -eux
 #
 # Variables
 #
+VERSION="0.1a"
+
 BASEDIR=$(cd $(dirname ${0}) && pwd -P)
 JOB_SCRIPT="${BASEDIR}/biosampleplus.job.sh"
-
-WORKDIR=$(cd $(dirname ${1}) && pwd -P)
-TTL_DIR="${WORKDIR}/ttl"
 
 #
 # Get xml.gz and decompress, and then parse XML to dump JSON-line (yet not valid JSON)
@@ -104,12 +103,12 @@ split_json() {
 # Get XML, create JSON-line, filter and dump to JSON files
 #
 xml2json() {
-  cd ${WORKDIR}
+  cd ${OUTDIR}
   xml2jsonl | jsonl2json
 }
 
 test_xml2json() {
-  cd ${WORKDIR}
+  cd ${OUTDIR}
   test_xml2jsonl | test_jsonl2json
 }
 
@@ -123,7 +122,7 @@ run_metasra() {
 
 submit_job() {
   source "/home/geadmin/UGED/uged/common/settings.sh"
-  find ${WORKDIR} -type f -name 'bsp.json.*' | while read json; do
+  find ${OUTDIR} -type f -name 'bsp.json.*' | while read json; do
     qsub -N $(basename ${json}) -j y -o ${json}.qsub.out -pe def_slot 8 -l s_vmem=64G -l mem_req=64G "${JOB_SCRIPT}" ${json}
   done
 }
@@ -144,7 +143,7 @@ wait_qsub() {
 #
 collect_ttl() {
   mkdir -p "${TTL_DIR}"
-  find ${WORKDIR} -type f -name '*ttl' | while read ttl; do
+  find ${OUTDIR} -type f -name '*ttl' | while read ttl; do
     if [[ ! -e "${ttl}.validation.failed" ]]; then
       mv ${ttl} ${TTL_DIR}
     fi
@@ -156,12 +155,64 @@ test() {
   run_metasra
 }
 
-main() {
+init() {
   xml2json
   run_metasra
 }
 
+print_version() {
+  echo "biosampleplus ${VERSION}"
+  exit 0
+}
+
+print_help() {
+  cat <<EOS
+ttl2virtuosodb version: ${VERSION}
+Usage:
+  biosampleplus.run.sh [--test] <output directory>
+EOS
+}
+
+main() {
+  # argparse and run
+  if [[ $# -eq 0 ]]; then
+    print_help
+    exit 0
+  fi
+  while [[ $# -gt 0 ]]; do
+    key=${1}
+    case ${key} in
+      -v|--version)
+        print_version
+        exit 0
+        ;;
+      -h|--help)
+        print_help
+        exit 0
+        ;;
+      "test")
+        CMD="test"
+        ;;
+      *)
+        OUTDIR=$(cd $(dirname ${1}) && pwd -P)
+        TTL_DIR="${OUTDIR}/ttl"
+        mkdir -p ${TTL_DIR}
+        ;;
+    esac
+    shift
+  done
+
+  case ${CMD} in
+    "test")
+      test
+      ;;
+    *)
+      init
+      ;;
+  esac
+}
+
 #
-# Exec
+# Run
 #
-test
+main ${@}
