@@ -4,10 +4,11 @@ set -eux
 #
 # Variables
 #
-BASEDIR=$(cd $(dirname $0) && pwd -P)
+BASEDIR=$(cd $(dirname ${0}) && pwd -P)
 JOB_SCRIPT="${BASEDIR}/biosampleplus.job.sh"
 
-WORKDIR=$(cd $(dirname $1) && pwd -P)
+WORKDIR=$(cd $(dirname ${1}) && pwd -P)
+TTL_DIR="${WORKDIR}/ttl"
 
 #
 # Get xml.gz and decompress, and then parse XML to dump JSON-line (yet not valid JSON)
@@ -134,6 +135,18 @@ wait_qsub() {
     if [[ -z ${running_jobs} ]]; then
       printf "All jobs finished.\n"
       break
+    fi
+  done
+}
+
+#
+# Collect ttl files
+#
+collect_ttl() {
+  mkdir -p "${TTL_DIR}"
+  find ${WORKDIR} -type f -name '*ttl' | while read ttl; do
+    if [[ ! -e "${ttl}.validation.failed" ]]; then
+      mv ${ttl} ${TTL_DIR}
     fi
   done
 }

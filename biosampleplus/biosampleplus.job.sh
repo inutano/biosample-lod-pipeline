@@ -17,6 +17,7 @@ METASRA_DOCKER_IMAGE="shikeda/metasra:1.4"
 run_metasra() {
   docker run --security-opt seccomp=unconfined --rm \
     -e TZ=Asia/Tokyo \
+    --user "$(id -u):$(id -g)" \
     --volume ${INPUT_DIR}:/work \
     ${METASRA_DOCKER_IMAGE} \
     python3 \
@@ -33,6 +34,7 @@ validate_ttl() {
   local validation_output="${ttl}.validation"
 
   docker run --security-opt seccomp=unconfined --rm \
+    --user "$(id -u):$(id -g)" \
     -v $(dirname "${ttl}"):/work \
     "quay.io/inutano/turtle-validator:v1.0" \
     ttl \
@@ -41,6 +43,8 @@ validate_ttl() {
 
   if [[ $(cat "${validation_output}") == 'Validator finished with 0 warnings and 0 errors.' ]]; then
     rm -f "${validation_output}"
+  else
+    mv "${validation_output}" "${validation_output}.failed"
   fi
 }
 
