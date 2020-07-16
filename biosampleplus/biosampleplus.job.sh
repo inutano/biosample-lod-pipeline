@@ -1,11 +1,12 @@
 #!/bin/bash
+#$ -S /bin/bash -j y
 set -eux
 
 #
 # Variables
 #
-INPUT_JSON=${1}
-INPUT_DIR=$(cd $(dirname ${INPUT_JSON}) && pwd -P)
+INPUT_DIR=$(cd $(dirname ${1}) && pwd -P)
+INPUT_JSON="${INPUT_DIR}/$(basename ${1})"
 
 METASRA_DOCKER_IMAGE="shikeda/metasra:1.4"
 
@@ -13,6 +14,7 @@ METASRA_DOCKER_IMAGE="shikeda/metasra:1.4"
 # Run MetaSRA
 #
 run_metasra() {
+  module load docker
   docker run --security-opt seccomp=unconfined --rm \
     -e TZ=Asia/Tokyo \
     --volume ${INPUT_DIR}:/work \

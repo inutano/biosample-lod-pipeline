@@ -4,9 +4,10 @@ set -eux
 #
 # Variables
 #
-WORKDIR=${0}
 BASEDIR=$(cd $(dirname $0) && pwd -P)
 JOB_SCRIPT="${BASEDIR}/biosampleplus.job.sh"
+
+WORKDIR=$(cd $(dirname $1) && pwd -P)
 
 #
 # Get xml.gz and decompress, and then parse XML to dump JSON-line (yet not valid JSON)
@@ -76,7 +77,7 @@ test_jsonl2json() {
 
 filter_jsonl() {
   local taxid=${1}
-  awk '$0 !~ /"characteristics":{}/' | awk '/"taxonomy_id":"'"${taxid}"'"/' | sed -e 's:,}}:}}:'
+  awk '$0 !~ /"characteristics":\{\}/' | awk '/"taxonomy_id":"'"${taxid}"'"/' | sed -e 's:,}}:}}:'
 }
 
 group_jsonl() {
@@ -95,7 +96,7 @@ group_jsonl() {
 }
 
 split_json() {
-  gsplit -l 1 -d - "bsp.json."
+  split -l 1 -d - "bsp.json."
 }
 
 #
@@ -122,7 +123,7 @@ run_metasra() {
 submit_job() {
   source "/home/geadmin/UGED/uged/common/settings.sh"
   find ${WORKDIR} -type f -name 'bsp.json.*' | while read json; do
-    qsub -N $(basename ${json}) -o /dev/null -pe def_slot 8 -l s_vmem=64G -l mem_req=64G "${JOB_SCRIPT}" ${json}
+    qsub -N $(basename ${json}) -j y -o ${json}.qsub.out -pe def_slot 8 -l s_vmem=64G -l mem_req=64G "${JOB_SCRIPT}" ${json}
   done
 }
 
