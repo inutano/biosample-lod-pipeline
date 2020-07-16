@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eux
+set -ux
 
 #
 # Variables
@@ -118,6 +118,7 @@ test_xml2json() {
 run_metasra() {
   submit_job
   wait_qsub
+  collect_ttl
 }
 
 submit_job() {
@@ -138,18 +139,19 @@ wait_qsub() {
   done
 }
 
-#
-# Collect ttl files
-#
 collect_ttl() {
-  mkdir -p "${TTL_DIR}"
   find ${OUTDIR} -type f -name '*ttl' | while read ttl; do
     if [[ ! -e "${ttl}.validation.failed" ]]; then
       mv ${ttl} ${TTL_DIR}
+      rm -f "$(baesname ${ttl} .ttl)"
+      rm -f "$(baesname ${ttl} .ttl).qsub.out"
     fi
   done
 }
 
+#
+# Operations
+#
 test() {
   test_xml2json
   run_metasra
