@@ -17,7 +17,6 @@ METASRA_DOCKER_IMAGE="shikeda/metasra:1.4"
 run_metasra() {
   docker run --security-opt seccomp=unconfined --rm \
     -e TZ=Asia/Tokyo \
-    --user "$(id -u):$(id -g)" \
     --volume ${INPUT_DIR}:/work \
     ${METASRA_DOCKER_IMAGE} \
     python3 \
