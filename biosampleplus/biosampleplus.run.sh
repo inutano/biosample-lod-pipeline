@@ -157,7 +157,7 @@ test() {
   run_metasra
 }
 
-init() {
+run() {
   xml2json
   run_metasra
 }
@@ -176,6 +176,9 @@ EOS
 }
 
 main() {
+  # Default command
+  CMD="run"
+
   # argparse and run
   if [[ $# -eq 0 ]]; then
     print_help
@@ -205,11 +208,11 @@ main() {
   done
 
   case ${CMD} in
+    "run")
+      run
+      ;;
     "test")
       test
-      ;;
-    *)
-      init
       ;;
   esac
 }
