@@ -143,8 +143,8 @@ collect_ttl() {
   find ${OUTDIR} -type f -name '*ttl' | while read ttl; do
     if [[ ! -e "${ttl}.validation.failed" ]]; then
       mv ${ttl} ${TTL_DIR}
-      rm -f "$(baesname ${ttl} .ttl)"
-      rm -f "$(baesname ${ttl} .ttl).qsub.out"
+      rm -f "$(basename ${ttl} .ttl)"
+      rm -f "$(basename ${ttl} .ttl).qsub.out"
     fi
   done
 }
