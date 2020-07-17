@@ -84,12 +84,18 @@ group_jsonl() {
   local size=${1}
   awk '
     NR % '"${size}"' == 1 {
-      printf "[" $0
-    } NR % '"${size}"' == 0 {
-      print "," $0 "]"
-    } NR % '"${size}"' > 1 {
-      printf "," $0
-    } END {
+      printf "["
+    }
+    NR % '"${size}"' != 1 {
+      printf ","
+    }
+    {
+      printf $0
+    }
+    NR % '"${size}"' == 0 {
+      print "]"
+    }
+    END {
       print "]"
     }
   '
