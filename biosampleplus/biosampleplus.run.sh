@@ -28,11 +28,10 @@ get_xml(){
 awk_xml2jsonl() {
   awk '
     $0 ~ /<BioSample / {
-      printf "{"
       for(i=1; i<=NF; i++) {
         if($i ~ /^accession/) {
           match($i, /\"SAM.+\"/)
-          printf "\"accession\":" substr($i, RSTART, RLENGTH)
+          printf "{\"accession\":%s", substr($i, RSTART, RLENGTH)
         }
       }
     }
@@ -41,7 +40,7 @@ awk_xml2jsonl() {
       for(i=1; i<=NF; i++) {
         if($i ~ /^taxonomy_id/) {
           match($i, /\".+\"/)
-          printf "," "\"taxonomy_id\":" substr($i, RSTART, RLENGTH) ",\"characteristics\":{"
+          printf ",\"taxonomy_id\":%s,\"characteristics\":{", substr($i, RSTART, RLENGTH)
         }
       }
     }
@@ -55,11 +54,11 @@ awk_xml2jsonl() {
       value = substr($0, RSTART, RLENGTH)
       sub(/<\/Attribute>/,"",value)
 
-      printf key ":[{\"text\":\"" value "\"}],"
+      printf "%s:[{\"text\":\"%s\"}],", key, value
     }
 
     $0 ~ /<\/BioSample>/ {
-     printf "}}\n"
+     print "}}"
     }
   '
 }
@@ -90,7 +89,7 @@ group_jsonl() {
       printf ","
     }
     {
-      printf $0
+      printf "%s", $0
     }
     NR % '"${size}"' == 0 {
       print "]"
