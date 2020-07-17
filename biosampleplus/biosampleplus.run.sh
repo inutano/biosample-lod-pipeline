@@ -16,10 +16,6 @@ xml2jsonl() {
   get_xml | gunzip | awk_xml2jsonl
 }
 
-test_xml2jsonl() {
-  xml2jsonl | head -100
-}
-
 get_xml(){
   local xml_path="ftp://ftp.ncbi.nlm.nih.gov/biosample/biosample_set.xml.gz"
   curl -s -o - ${xml_path}
@@ -71,7 +67,7 @@ jsonl2json() {
 }
 
 test_jsonl2json() {
-  filter_jsonl "408172" | group_jsonl 3 | split_json
+  filter_jsonl "9606" | head -99 | group_jsonl 20 | split_json
 }
 
 filter_jsonl() {
@@ -114,7 +110,7 @@ xml2json() {
 
 test_xml2json() {
   cd ${OUTDIR}
-  test_xml2jsonl | test_jsonl2json
+  xml2jsonl | test_jsonl2json
 }
 
 #
