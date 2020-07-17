@@ -153,26 +153,45 @@ collect_ttl() {
 #
 # Operations
 #
-test() {
+make_json() {
+  xml2json
+}
+
+test_make_json() {
   test_xml2json
-  run_metasra
 }
 
 run() {
-  xml2json
+  make_json
+  run_metasra
+}
+
+test_run() {
+  test_make_json
   run_metasra
 }
 
 print_version() {
-  echo "biosampleplus ${VERSION}"
+  echo "biosampleplus running script ${VERSION}"
   exit 0
 }
 
 print_help() {
   cat <<EOS
 ttl2virtuosodb version: ${VERSION}
+
+*Require UGE and Docker for running metasra*
+
 Usage:
-  biosampleplus.run.sh [-v|-h|test] <output directory>
+  biosampleplus.run.sh <option> <output directory>
+
+Option:
+  --version         Show version of the script and exit
+  --help            Show this help message and exit
+  --make-json       Make JSON files for MetaSRA input
+  --test-make-json  Test --make-json function
+  --run             Make JSON files and run MetaSRA pipeline
+  --test-run        Test --run function
 EOS
 }
 
@@ -181,10 +200,6 @@ main() {
   CMD="run"
 
   # argparse and run
-  if [[ $# -eq 0 ]]; then
-    print_help
-    exit 0
-  fi
   while [[ $# -gt 0 ]]; do
     key=${1}
     case ${key} in
@@ -196,8 +211,17 @@ main() {
         print_help
         exit 0
         ;;
-      "test")
-        CMD="test"
+      "--make-json")
+        CMD="make_json"
+        ;;
+      "--test-make-json")
+        CMD="test_make_json"
+        ;;
+      "--run")
+        CMD="run"
+        ;;
+      "--test-run")
+        CMD="test_run"
         ;;
       *)
         OUTDIR=$(cd $(dirname ${1}) && pwd -P)
@@ -209,11 +233,17 @@ main() {
   done
 
   case ${CMD} in
+    "make_json")
+      make_json
+      ;;
+    "test_make_json")
+      test_make_json
+      ;;
     "run")
       run
       ;;
-    "test")
-      test
+    "test_run")
+      test_run
       ;;
   esac
 }
@@ -221,4 +251,9 @@ main() {
 #
 # Run
 #
-main ${@}
+if [[ $# -eq 0 ]]; then
+  print_help
+  exit 0
+else
+  main ${@}
+fi
