@@ -1,5 +1,5 @@
 #!/bin/bash
-set -ux
+set -u
 
 #
 # Variables
@@ -172,7 +172,7 @@ print_help() {
   cat <<EOS
 ttl2virtuosodb version: ${VERSION}
 Usage:
-  biosampleplus.run.sh [--test] <output directory>
+  biosampleplus.run.sh [-v|-h|test] <output directory>
 EOS
 }
 
