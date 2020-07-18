@@ -49,6 +49,7 @@ awk_xml2jsonl() {
       match($0, /[^>]+<\/Attribute>/)
       value = substr($0, RSTART, RLENGTH)
       sub(/<\/Attribute>/,"",value)
+      gsub(/["\\]/, "\\\\&", value)
 
       printf "%s:[{\"text\":\"%s\"}],", key, value
     }
