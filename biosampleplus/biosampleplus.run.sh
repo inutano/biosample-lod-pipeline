@@ -20,8 +20,8 @@ xml2jsonline() {
 
 get_xml(){
   local xml_local_path="${OUTDIR}/$(basename ${BIOSAMPLE_XML_REMOTE_PATH})"
-  wget -o ${xml_local_path} ${BIOSAMPLE_XML_REMOTE_PATH}
-  gunzip -c ${xml_local_path}
+  wget --output-document ${xml_local_path} ${BIOSAMPLE_XML_REMOTE_PATH}
+  gunzip --stdout ${xml_local_path}
 }
 
 awk_xml2jsonline() {
@@ -115,7 +115,7 @@ group_jsonline() {
 }
 
 split_to_json() {
-  split -l 1 -d - "bsp.json."
+  split --lines 1 --numeric-suffixes - "bsp.json."
 }
 
 #
