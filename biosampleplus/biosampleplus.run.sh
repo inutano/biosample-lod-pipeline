@@ -23,7 +23,7 @@ test_xml2jsonline() {
 }
 
 get_xml(){
-  local xml_local_path="${OUTDIR}/$(basename ${xml_remote_path})"
+  local xml_local_path="${OUTDIR}/$(basename ${BIOSAMPLE_XML_REMOTE_PATH})"
   wget -o ${xml_local_path} ${BIOSAMPLE_XML_REMOTE_PATH}
   gunzip -c ${xml_local_path}
 }
