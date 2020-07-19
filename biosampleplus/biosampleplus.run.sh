@@ -18,18 +18,10 @@ xml2jsonline() {
   get_xml | awk_xml2jsonline
 }
 
-test_xml2jsonline() {
-  test_get_xml | awk_xml2jsonline
-}
-
 get_xml(){
   local xml_local_path="${OUTDIR}/$(basename ${BIOSAMPLE_XML_REMOTE_PATH})"
   wget -o ${xml_local_path} ${BIOSAMPLE_XML_REMOTE_PATH}
   gunzip -c ${xml_local_path}
-}
-
-test_get_xml() {
-  curl ${BIOSAMPLE_XML_REMOTE_PATH} | gunzip -c
 }
 
 awk_xml2jsonline() {
@@ -136,7 +128,7 @@ xml2json() {
 
 test_xml2json() {
   cd ${OUTDIR}
-  test_xml2jsonline | test_jsonline2json
+  xml2jsonline | test_jsonline2json
 }
 
 #
