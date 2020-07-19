@@ -46,7 +46,7 @@ awk_xml2jsonline() {
       printf "{\"accession\":%s,\"submission_date\":%s", acc, date
     }
 
-    $0 ~ /<Organism/ {
+    $0 ~ /<Organism / {
       match($0, /taxonomy_id="[^"]+"/)
       taxid = substr($0, RSTART, RLENGTH)
       sub(/taxonomy_id=/,"",taxid)
