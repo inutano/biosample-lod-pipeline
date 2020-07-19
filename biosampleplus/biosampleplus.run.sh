@@ -53,7 +53,7 @@ awk_xml2jsonline() {
       printf ",\"taxonomy_id\":%s", taxid
     }
 
-    {
+    $0 ~ /<Attributes/ {
       printf ",\"characteristics\":{"
     }
 
