@@ -184,6 +184,7 @@ make_json() {
 }
 
 test_make_json() {
+  set -x
   test_xml2json
 }
 
@@ -193,6 +194,7 @@ run() {
 }
 
 test_run() {
+  set -x
   test_make_json
   run_metasra
 }
