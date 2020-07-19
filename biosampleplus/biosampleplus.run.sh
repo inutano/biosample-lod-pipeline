@@ -12,16 +12,18 @@ JOB_SCRIPT="${BASEDIR}/biosampleplus.job.sh"
 #
 # Get xml.gz and decompress, and then parse XML to dump JSON-line (yet not valid JSON)
 #
-xml2jsonl() {
-  get_xml | gunzip | awk_xml2jsonl
+xml2jsonline() {
+  get_xml | awk_xml2jsonline
 }
 
 get_xml(){
-  local xml_path="ftp://ftp.ncbi.nlm.nih.gov/biosample/biosample_set.xml.gz"
-  curl -s -o - ${xml_path}
+  local xml_remote_path="ftp://ftp.ncbi.nlm.nih.gov/biosample/biosample_set.xml.gz"
+  local xml_local_path="${OUTDIR}/$(basename ${xml_remote_path})"
+  wget -o ${xml_local_path} ${xml_remote_path}
+  gunzip -c ${xml_local_path}
 }
 
-awk_xml2jsonl() {
+awk_xml2jsonline() {
   awk '
     $0 ~ /<BioSample / {
       for(i=1; i<=NF; i++) {
@@ -63,20 +65,20 @@ awk_xml2jsonl() {
 #
 # Filter JSON-line, make them valid JSON format, and split into files
 #
-jsonl2json() {
-  filter_jsonl "9606" | group_jsonl 50000 | split_json
+jsonline2json() {
+  filter_jsonline "9606" | group_jsonline 50000 | split_to_json
 }
 
-test_jsonl2json() {
-  filter_jsonl "9606" | head -99 | group_jsonl 20 | split_json
+test_jsonline2json() {
+  filter_jsonline "9606" | head -99 | group_jsonline 20 | split_to_json
 }
 
-filter_jsonl() {
+filter_jsonline() {
   local taxid=${1}
   awk '$0 !~ /"characteristics":\{\}/' | awk '/"taxonomy_id":"'"${taxid}"'"/' | sed -e 's:,}}:}}:'
 }
 
-group_jsonl() {
+group_jsonline() {
   local size=${1}
   awk '
     NR % '"${size}"' == 1 {
@@ -97,7 +99,7 @@ group_jsonl() {
   '
 }
 
-split_json() {
+split_to_json() {
   split -l 1 -d - "bsp.json."
 }
 
@@ -106,12 +108,12 @@ split_json() {
 #
 xml2json() {
   cd ${OUTDIR}
-  xml2jsonl | jsonl2json
+  xml2jsonline | jsonline2json
 }
 
 test_xml2json() {
   cd ${OUTDIR}
-  xml2jsonl | test_jsonl2json
+  xml2jsonline | test_jsonline2json
 }
 
 #
