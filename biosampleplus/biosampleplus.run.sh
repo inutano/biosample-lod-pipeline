@@ -98,7 +98,7 @@ filter_jsonline_by_taxid() {
 
 filter_jsonline_by_year() {
   local year=${1}
-  awk '/"submission_date":"'"${year}"'"/'
+  awk '/"submission_date":"'"${year}"'/'
 }
 
 group_jsonline() {
