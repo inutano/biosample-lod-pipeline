@@ -9,6 +9,8 @@ VERSION="0.1a"
 BASEDIR=$(cd $(dirname ${0}) && pwd -P)
 JOB_SCRIPT="${BASEDIR}/biosampleplus.job.sh"
 
+BIOSAMPLE_XML_REMOTE_PATH="ftp://ftp.ncbi.nlm.nih.gov/biosample/biosample_set.xml.gz"
+
 #
 # Get xml.gz and decompress, and then parse XML to dump JSON-line (yet not valid JSON)
 #
@@ -16,31 +18,43 @@ xml2jsonline() {
   get_xml | awk_xml2jsonline
 }
 
+test_xml2jsonline() {
+  test_get_xml | awk_xml2jsonline
+}
+
 get_xml(){
-  local xml_remote_path="ftp://ftp.ncbi.nlm.nih.gov/biosample/biosample_set.xml.gz"
   local xml_local_path="${OUTDIR}/$(basename ${xml_remote_path})"
-  wget -o ${xml_local_path} ${xml_remote_path}
+  wget -o ${xml_local_path} ${BIOSAMPLE_XML_REMOTE_PATH}
   gunzip -c ${xml_local_path}
+}
+
+test_get_xml() {
+  curl ${BIOSAMPLE_XML_REMOTE_PATH} | gunzip -c
 }
 
 awk_xml2jsonline() {
   awk '
     $0 ~ /<BioSample / {
-      for(i=1; i<=NF; i++) {
-        if($i ~ /^accession/) {
-          match($i, /\"SAM.+\"/)
-          printf "{\"accession\":%s", substr($i, RSTART, RLENGTH)
-        }
-      }
+      match($0, /submission_date="[^"]+"/)
+      date = substr($0, RSTART, RLENGTH)
+      sub(/submission_date=/,"",date)
+
+      match($0, /accession="[^"]+"/)
+      acc = substr($0, RSTART, RLENGTH)
+      sub(/accession=/,"",acc)
+
+      printf "{\"accession\":%s,\"submission_date\":%s", acc, date
     }
 
     $0 ~ /<Organism/ {
-      for(i=1; i<=NF; i++) {
-        if($i ~ /^taxonomy_id/) {
-          match($i, /\".+\"/)
-          printf ",\"taxonomy_id\":%s,\"characteristics\":{", substr($i, RSTART, RLENGTH)
-        }
-      }
+      match($0, /taxonomy_id="[^"]+"/)
+      taxid = substr($0, RSTART, RLENGTH)
+      sub(/taxonomy_id=/,"",taxid)
+      printf ",\"taxonomy_id\":%s", taxid
+    }
+
+    {
+      printf ",\"characteristics\":{"
     }
 
     $0 ~ /<Attribute / {
@@ -66,16 +80,25 @@ awk_xml2jsonline() {
 # Filter JSON-line, make them valid JSON format, and split into files
 #
 jsonline2json() {
-  filter_jsonline "9606" | group_jsonline 50000 | split_to_json
+  remove_invalid_jsonline | filter_jsonline_by_taxid "9606" | filter_jsonline_by_year "2019" | group_jsonline 5000 | split_to_json
 }
 
 test_jsonline2json() {
-  filter_jsonline "9606" | head -99 | group_jsonline 20 | split_to_json
+  remove_invalid_jsonline | filter_jsonline_by_taxid "9606" | filter_jsonline_by_year "2019" | head -99 | group_jsonline 20 | split_to_json
 }
 
-filter_jsonline() {
+remove_invalid_jsonline() {
+  awk '$0 !~ /"characteristics":\{\}/' | sed -e 's:,}}:}}:'
+}
+
+filter_jsonline_by_taxid() {
   local taxid=${1}
-  awk '$0 !~ /"characteristics":\{\}/' | awk '/"taxonomy_id":"'"${taxid}"'"/' | sed -e 's:,}}:}}:'
+  awk '/"taxonomy_id":"'"${taxid}"'"/'
+}
+
+filter_jsonline_by_year() {
+  local year=${1}
+  awk '/"submission_date":"'"${year}"'"/'
 }
 
 group_jsonline() {
@@ -113,7 +136,7 @@ xml2json() {
 
 test_xml2json() {
   cd ${OUTDIR}
-  xml2jsonline | test_jsonline2json
+  test_xml2jsonline | test_jsonline2json
 }
 
 #
