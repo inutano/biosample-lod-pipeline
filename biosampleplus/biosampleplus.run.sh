@@ -20,7 +20,9 @@ xml2jsonline() {
 
 get_xml(){
   local xml_local_path="${OUTDIR}/$(basename ${BIOSAMPLE_XML_REMOTE_PATH})"
-  wget --output-document ${xml_local_path} ${BIOSAMPLE_XML_REMOTE_PATH}
+  if [[ ! -e ${xml_local_path} ]]; then
+    wget --output-document ${xml_local_path} ${BIOSAMPLE_XML_REMOTE_PATH}
+  fi
   gunzip --stdout ${xml_local_path}
 }
 
