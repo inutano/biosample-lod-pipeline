@@ -15,7 +15,7 @@ BIOSAMPLE_XML_REMOTE_PATH="ftp://ftp.ncbi.nlm.nih.gov/biosample/biosample_set.xm
 # Get xml.gz and decompress, and then parse XML to dump JSON-line (yet not valid JSON)
 #
 xml2jsonline() {
-  get_xml | awk_xml2jsonline
+  get_xml | subset_xml_by_year "2019" | awk_xml2jsonline
 }
 
 get_xml(){
@@ -24,6 +24,12 @@ get_xml(){
     wget --output-document ${xml_local_path} ${BIOSAMPLE_XML_REMOTE_PATH}
   fi
   gunzip --stdout ${xml_local_path}
+}
+
+subset_xml_by_year() {
+  local year=${1}
+  local prev_of_first_appear=$(grep -n "submission_date=\"${year}" | head -1 | awk -F ':' '{ print $1 - 1 }')
+  sed -e "2,${prev_of_first_appear}d"
 }
 
 awk_xml2jsonline() {
@@ -74,11 +80,11 @@ awk_xml2jsonline() {
 # Filter JSON-line, make them valid JSON format, and split into files
 #
 jsonline2json() {
-  remove_invalid_jsonline | filter_jsonline_by_taxid "9606" | filter_jsonline_by_year "2019" | group_jsonline 5000 | split_to_json
+  remove_invalid_jsonline | filter_jsonline_by_taxid "9606" | group_jsonline 5000 | split_to_json
 }
 
 test_jsonline2json() {
-  remove_invalid_jsonline | filter_jsonline_by_taxid "9606" | filter_jsonline_by_year "2019" | head -99 | group_jsonline 20 | split_to_json
+  remove_invalid_jsonline | filter_jsonline_by_taxid "9606" | head -99 | group_jsonline 20 | split_to_json
 }
 
 remove_invalid_jsonline() {
@@ -88,11 +94,6 @@ remove_invalid_jsonline() {
 filter_jsonline_by_taxid() {
   local taxid=${1}
   awk '/"taxonomy_id":"'"${taxid}"'"/'
-}
-
-filter_jsonline_by_year() {
-  local year=${1}
-  awk '/"submission_date":"'"${year}"'/'
 }
 
 group_jsonline() {
