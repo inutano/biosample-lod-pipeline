@@ -15,21 +15,24 @@ BIOSAMPLE_XML_REMOTE_PATH="ftp://ftp.ncbi.nlm.nih.gov/biosample/biosample_set.xm
 # Get xml.gz and decompress, and then parse XML to dump JSON-line (yet not valid JSON)
 #
 xml2jsonline() {
-  get_xml | subset_xml_by_year "2019" | sebset_xml_tags | awk_xml2jsonline
+  local xml_path=$(get_xml)
+  subset_xml_by_year ${xml_path} "2019" | sebset_xml_tags | awk_xml2jsonline
 }
 
 get_xml(){
-  local xml_local_path="${OUTDIR}/$(basename ${BIOSAMPLE_XML_REMOTE_PATH})"
-  if [[ ! -e ${xml_local_path} ]]; then
-    wget --output-document ${xml_local_path} ${BIOSAMPLE_XML_REMOTE_PATH}
+  local xml_path="${OUTDIR}/$(basename ${BIOSAMPLE_XML_REMOTE_PATH} ".gz")"
+  if [[ ! -e ${xml_path} ]]; then
+    wget --output-document "${xml_path}.gz" ${BIOSAMPLE_XML_REMOTE_PATH}
+    gunzip "${xml_path}.gz"
   fi
-  gunzip --stdout ${xml_local_path}
+  echo "${xml_path}"
 }
 
 subset_xml_by_year() {
-  local year=${1}
-  local prev_of_first_appear=$(grep -n "submission_date=\"${year}" | head -1 | awk -F ':' '{ print $1 - 1 }')
-  sed -e "2,${prev_of_first_appear}d"
+  local xml_path=${1}
+  local year=${2}
+  local prev_of_first_appear=$(grep -n "submission_date=\"${year}" ${xml_path} | head -1 | awk -F ':' '{ print $1 - 1 }')
+  sed -e "2,${prev_of_first_appear}d" ${xml_path}
 }
 
 sebset_xml_tags() {
