@@ -1,5 +1,8 @@
 #!/bin/bash
 #$ -S /bin/bash -j y
+# Note: `data "+%s%N"` does not work with BSD/macOS
+N=$(date +%s%N)
+PS4='+[$((($(date +%s%N)-${N})/1000000))ms][${BASH_SOURCE}:${LINENO}]: ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
 set -eux
 
 #

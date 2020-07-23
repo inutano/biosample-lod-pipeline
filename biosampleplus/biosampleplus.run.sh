@@ -188,12 +188,18 @@ collect_ttl() {
 #
 # Operations
 #
+enable_debug_mode() {
+  N=$(date +%s%N)
+  PS4='+[$((($(date +%s%N)-${N})/1000000))ms][${BASH_SOURCE}:${LINENO}]: ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+  set -x
+}
+
 make_json() {
   xml2json
 }
 
 test_make_json() {
-  set -x
+  enable_debug_mode
   test_xml2json
 }
 
@@ -203,7 +209,7 @@ run() {
 }
 
 test_run() {
-  set -x
+  enable_debug_mode
   test_make_json
   run_metasra
 }
