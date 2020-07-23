@@ -5,32 +5,44 @@ N=$(date +%s%N)
 PS4='+[$((($(date +%s%N)-${N})/1000000))ms][${BASH_SOURCE}:${LINENO}]: ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
 set -eux
 
-#
-# Variables
-#
-INPUT_DIR=$(cd $(dirname ${1}) && pwd -P)
-INPUT_JSON="${INPUT_DIR}/$(basename ${1})"
-
 module load docker
 METASRA_DOCKER_IMAGE="shikeda/metasra:1.4"
+
+#
+# Staging
+#
+stage_json() {
+  local input_json=${1}
+  local input_json_dir=$(cd $(dirname ${input_json}) && pwd -P)
+  local input_json_fname=$(basename ${input_json})
+
+  local workdir="/data1/tmp/biosample-lod/bsp/${input_json_fname}.tmpdir"
+  local work_json="${workdir}/${input_json_fname}"
+
+  rm -fr ${workdir}; mkdir -p ${workdir}
+  cp "${input_json_dir}/${input_json_fname}" "${work_json}"
+
+  echo "${work_json}"
+}
 
 #
 # Run MetaSRA
 #
 run_metasra() {
+  local json_path="${1}"
   docker run --security-opt seccomp=unconfined --rm \
     -e TZ=Asia/Tokyo \
-    --volume ${INPUT_DIR}:/work \
+    --volume $(dirname ${json_path}):/work \
     ${METASRA_DOCKER_IMAGE} \
     python3 \
     "/app/MetaSRA-pipeline/run_pipeline.py" \
     "-f" \
-    "/work/$(basename ${INPUT_JSON})" \
+    "/work/$(basename ${json_path})" \
     "-n" \
     "8" \
     "-o" \
-    "/work/$(basename ${INPUT_JSON}).ttl"
-  echo "${INPUT_JSON}.ttl"
+    "/work/$(basename ${json_path}).ttl"
+  echo "${json_path}.ttl"
 }
 
 validate_ttl() {
@@ -46,18 +58,19 @@ validate_ttl() {
     > "${validation_output}"
 
   if [[ $(cat "${validation_output}") == 'Validator finished with 0 warnings and 0 errors.' ]]; then
-    rm -f "${validation_output}"
+    mv "${ttl}" "${INPUT_DIR}"
   else
-    mv "${validation_output}" "${validation_output}.failed"
+    mv "${validation_output}" "${INPUT_DIR}/${validation_output}.failed"
   fi
 }
 
 main() {
-  local ttl=$(run_metasra)
+  local json=$(stage_json ${1})
+  local ttl=$(run_metasra ${json})
   validate_ttl ${ttl}
 }
 
 #
 # Exec
 #
-main
+main ${1}
