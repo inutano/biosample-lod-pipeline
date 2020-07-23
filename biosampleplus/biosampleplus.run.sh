@@ -158,8 +158,8 @@ submit_job() {
       -j y \
       -o ${json}.qsub.out \
       -pe def_slot 8 \
-      -l s_vmem=64G \
-      -l mem_req=64G \
+      -l s_vmem=8G \
+      -l mem_req=8G \
       "${JOB_SCRIPT}" ${json}
   done
 }
