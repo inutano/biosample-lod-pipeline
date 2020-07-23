@@ -152,7 +152,7 @@ run_metasra() {
 
 submit_job() {
   source "/home/geadmin/UGED/uged/common/settings.sh"
-  find ${OUTDIR} -type f -name 'bsp.json.*' | while read json; do
+  find ${OUTDIR} -type f -maxdepth 1 -name 'bsp.json.*' | while read json; do
     qsub \
       -N $(basename ${json}) \
       -j y \
@@ -176,7 +176,7 @@ wait_qsub() {
 }
 
 collect_ttl() {
-  find ${OUTDIR} -type f -name '*ttl' | while read ttl; do
+  find ${OUTDIR} -type f -maxdepth 1 -name '*ttl' | while read ttl; do
     if [[ ! -e "${ttl}.validation.failed" ]]; then
       mv ${ttl} ${TTL_DIR}
       rm -f "$(basename ${ttl} .ttl)"
