@@ -23,6 +23,8 @@ run_metasra() {
     "/app/MetaSRA-pipeline/run_pipeline.py" \
     "-f" \
     "/work/$(basename ${INPUT_JSON})" \
+    "-n" \
+    "8" \
     "-o" \
     "/work/$(basename ${INPUT_JSON}).ttl"
   echo "${INPUT_JSON}.ttl"

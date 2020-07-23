@@ -153,7 +153,14 @@ run_metasra() {
 submit_job() {
   source "/home/geadmin/UGED/uged/common/settings.sh"
   find ${OUTDIR} -type f -name 'bsp.json.*' | while read json; do
-    qsub -N $(basename ${json}) -j y -o ${json}.qsub.out -pe def_slot 8 -l s_vmem=64G -l mem_req=64G "${JOB_SCRIPT}" ${json}
+    qsub \
+      -N $(basename ${json}) \
+      -j y \
+      -o ${json}.qsub.out \
+      -pe def_slot 8 \
+      -l s_vmem=64G \
+      -l mem_req=64G \
+      "${JOB_SCRIPT}" ${json}
   done
 }
 
