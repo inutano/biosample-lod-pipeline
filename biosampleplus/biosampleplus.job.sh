@@ -47,7 +47,7 @@ run_metasra() {
 
 validate_ttl() {
   local ttl=${1}
-  local validation_output="${ttl}.validation"
+  local validation_output="${ttl}.validation.failed"
 
   docker run --security-opt seccomp=unconfined --rm \
     --user "$(id -u):$(id -g)" \
@@ -58,16 +58,30 @@ validate_ttl() {
     > "${validation_output}"
 
   if [[ $(cat "${validation_output}") == 'Validator finished with 0 warnings and 0 errors.' ]]; then
-    mv "${ttl}" "${INPUT_DIR}"
+    echo "${ttl}"
   else
-    mv "${validation_output}" "${INPUT_DIR}/${validation_output}.failed"
+    mv "${validation_output}" "${validation_output}"
+    echo "${validation_output}"
   fi
 }
 
+#
+# Export output file, ttl file or failed ttl validation log
+#
+export_output() {
+  local output_file=${1}
+  local output_dir=${2}
+  mv ${1} ${2}
+}
+
+#
+# Main function
+#
 main() {
-  local json=$(stage_json ${1})
-  local ttl=$(run_metasra ${json})
-  validate_ttl ${ttl}
+  local json_path=$(stage_json ${1})
+  local ttl_path=$(run_metasra ${json_path})
+  local outfile=$(validate_ttl ${ttl_path})
+  export_output ${outfile} $(dirname ${1})
 }
 
 #
