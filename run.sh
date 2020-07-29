@@ -163,21 +163,21 @@ test_load_to_virtuoso() {
 #
 # Publish virtuoso.db data file on the http-reachable storage
 #
-publish_virtuoso_db() {
+export_outputs() {
   local db_file="${WORKDIR}/virtuoso/virtuoso.db"
   local dest_path="${WORKDIR}/dest"
   echo "https://dbcls.rois.ac.jp"
 }
 
-test_publish_virtuoso_db() {
-  local dest_path=$(publish_virtuoso_db)
+test_export_outputs() {
+  local dest_path=$(export_outputs)
   local dest_http_status=$(curl -s -o /dev/null -LI ${dest_path} -w '%{http_code}\n')
   local dest_file_size=$(curl -s -o /dev/null -LI ${dest_path} -w '%{size_download}\n')
   if [[ ${dest_http_status} != 200 ]]; then
-    message "publish_virtuoso_db: FAILED\n" "danger" | tee -a ${LOGFILE}
+    message "export_outputs: FAILED\n" "danger" | tee -a ${LOGFILE}
     message "  http status:      ${dest_http_status}\n" | tee -a ${LOGFILE}
     message "  remote file size: ${dest_file_size}\n" | tee -a ${LOGFILE}
-    FAILED+=(publish_virtuoso_db)
+    FAILED+=(export_outputs)
   else
     message "mirror_virtuoso_db: SUCCESS\n" "info" | tee -a ${LOGFILE}
     message "  remote file size: ${dest_file_size}\n" | tee -a ${LOGFILE}
@@ -194,7 +194,7 @@ test() {
   test_generate_accessions
   # test_generate_experiment
   test_load_to_virtuoso
-  test_publish_virtuoso_db
+  test_export_outputs
 
   if [[ ${#FAILED[@]} -ne 0 ]]; then
     for i in "${FAILED[@]}"; do
@@ -213,7 +213,7 @@ main() {
   generate_accessions
   # generate_experiment # Under construction
   load_to_virtuoso
-  publish_virtuoso_db
+  export_outputs
 }
 
 ### Exec
