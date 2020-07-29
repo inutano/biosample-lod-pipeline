@@ -81,6 +81,22 @@ test_generate_biosample() {
 }
 
 #
+# Create BioSamplePlus RDF: Run MetaSRA pipeline to map BioSample arrtibutes to ontologies
+#
+generate_biosampleplus() {
+  local wdir=${WORKDIR}/bsp
+  git clone 'git://github.com/inutano/biosampleplus-pipeline' --depth 1 ${wdir}
+  cd ${wdir}
+  run_biosampleplus=$(bash ./biosampleplus/biosampleplus.run.sh --run ${wdir})
+  echo "${wdir}/ttl"
+}
+
+test_generate_biosampleplus() {
+  local wdir=$(generate_biosampleplus)
+  test_ttl_generator "biosampleplus" ${wdir}
+}
+
+#
 # Create SRA accessions RDF: Run accessions-ttl-generator-split
 #
 generate_accessions() {
@@ -174,6 +190,7 @@ test_publish_virtuoso_db() {
 test() {
   setup
   test_generate_biosample
+  test_generate_biosampleplus
   test_generate_accessions
   # test_generate_experiment
   test_load_to_virtuoso
@@ -192,6 +209,7 @@ test() {
 main() {
   setup
   generate_biosample
+  generate_biosampleplus
   generate_accessions
   # generate_experiment # Under construction
   load_to_virtuoso
