@@ -65,7 +65,7 @@ test_ttl_generator() {
 }
 
 #
-# Craete BioSample RDF: Run bs2ld via biosample.run.sh with GridEngine
+# Create BioSample RDF: Run bs2ld via biosample.run.sh with GridEngine
 #
 generate_biosample() {
   local wdir=${WORKDIR}/biosample
@@ -175,7 +175,7 @@ test() {
   setup
   test_generate_biosample
   test_generate_accessions
-  test_generate_experiment
+  # test_generate_experiment
   test_load_to_virtuoso
   test_publish_virtuoso_db
 
