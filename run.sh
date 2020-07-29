@@ -31,10 +31,10 @@ message() {
 # Setup working directory and log file
 #
 setup() {
-  WORKDIR="${WORKDIR_BASE}/biosample-lod/$(date +%Y%m%d-%H%M)"
+  WORKDIR="${WORKDIR_BASE}/biosampleplus-pipeline/$(date +%Y%m%d-%H%M)"
   mkdir -p ${WORKDIR}
 
-  LOGFILE="${WORKDIR}/biosample-lod.log"
+  LOGFILE="${WORKDIR}/biosampleplus-pipeline.log"
   touch ${LOGFILE}
 
   cd ${WORKDIR}
