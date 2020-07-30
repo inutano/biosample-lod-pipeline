@@ -40,7 +40,10 @@ set_job_name() {
 create_xml() {
   local job_param=${1}
   local tmp_xml="${TMPDIR}/$(set_job_name ${job_param}).xml"
-  printf "<BioSampleSet>\n$(cat "${XML_PATH}" | sed -n "${job_param}")" > ${tmp_xml}
+
+  printf "<BioSampleSet>\n" > ${tmp_xml}
+  sed -n "${job_param}" "${XML_PATH}" >> ${tmp_xml}
+
   echo ${tmp_xml}
 }
 
