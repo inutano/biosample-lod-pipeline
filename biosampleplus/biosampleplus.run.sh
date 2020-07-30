@@ -22,7 +22,7 @@ xml2jsonline() {
 get_xml() {
   local xml_path="${OUTDIR}/$(basename ${BIOSAMPLE_XML_REMOTE_PATH} ".gz")"
   if [[ ! -e ${xml_path} ]]; then
-    wget --output-document "${xml_path}.gz" ${BIOSAMPLE_XML_REMOTE_PATH}
+    lftp -c "open $(dirname ${BIOSAMPLE_XML_REMOTE_PATH}) && pget -n 8 $(basename ${BIOSAMPLE_XML_REMOTE_PATH}) -o ${xml_path}.gz"
     gunzip "${xml_path}.gz"
   fi
   echo "${xml_path}"

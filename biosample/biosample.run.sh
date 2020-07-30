@@ -18,7 +18,7 @@ BIOSAMPLE_XML_REMOTE_PATH="ftp://ftp.ncbi.nlm.nih.gov/biosample/biosample_set.xm
 get_xml() {
   local xml_path="${OUTDIR}/$(basename ${BIOSAMPLE_XML_REMOTE_PATH} ".gz")"
   if [[ ! -e ${xml_path} ]]; then
-    lftp -c "open $(dirname ${BIOSAMPLE_XML_REMOTE_PATH}) && pget -n 8 ${xml_path}.gz"
+    lftp -c "open $(dirname ${BIOSAMPLE_XML_REMOTE_PATH}) && pget -n 8 $(basename ${BIOSAMPLE_XML_REMOTE_PATH}) -o ${xml_path}.gz"
     gunzip "${xml_path}.gz"
   fi
   echo "${xml_path}"
