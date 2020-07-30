@@ -49,7 +49,7 @@ create_xml() {
 
 xml2ttl() {
   local tmp_xml=${1}
-  local tmp_ttl="$(basename ${tmp_xml} .xml).ttl"
+  local tmp_ttl="${TMPDIR}/$(basename ${tmp_xml} .xml).ttl"
   docker run \
     --security-opt seccomp=unconfined \
     --rm \
