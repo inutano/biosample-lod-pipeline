@@ -70,15 +70,21 @@ test_ttl_generator() {
 #
 generate_biosample() {
   local wdir=${WORKDIR}/biosample
-  git clone 'git://github.com/inutano/biosample_jsonld' -b 'v1.9' --depth 1 ${wdir}
+  git clone 'git://github.com/inutano/biosampleplus-pipeline' --depth 1 ${wdir}
   cd ${wdir}
-  run_biosample=$(bash ./sh/biosample.run.sh ${wdir})
+
+  if [[ $# -gt 0 ]]; then
+    run_biosample=$(bash ./biosample/biosample.run.sh ${wdir} "test")
+  else
+    run_biosample=$(bash ./biosample/biosample.run.sh ${wdir})
+  fi
+
   echo "${wdir}/ttl"
 }
 
 test_generate_biosample() {
-  local wdir=$(generate_biosample)
-  test_ttl_generator "biosample" ${wdir}
+  local outdir=$(generate_biosample "--test-run")
+  test_ttl_generator "biosample" ${outdir}
 }
 
 #
