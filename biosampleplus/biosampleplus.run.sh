@@ -19,7 +19,7 @@ xml2jsonline() {
   subset_xml_by_year ${xml_path} "2019" | sebset_xml_tags | awk_xml2jsonline
 }
 
-get_xml(){
+get_xml() {
   local xml_path="${OUTDIR}/$(basename ${BIOSAMPLE_XML_REMOTE_PATH} ".gz")"
   if [[ ! -e ${xml_path} ]]; then
     wget --output-document "${xml_path}.gz" ${BIOSAMPLE_XML_REMOTE_PATH}
@@ -215,13 +215,12 @@ test_run() {
 }
 
 print_version() {
-  echo "biosampleplus running script ${VERSION}"
-  exit 0
+  echo "BioSample+ RDF generator version: ${VERSION}"
 }
 
 print_help() {
+  print_version
   cat <<EOS
-ttl2virtuosodb version: ${VERSION}
 
 *Require UGE and Docker for running metasra*
 

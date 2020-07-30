@@ -58,9 +58,9 @@ validate_ttl() {
     > "${validation_output}"
 
   if [[ $(cat "${validation_output}") == 'Validator finished with 0 warnings and 0 errors.' ]]; then
+    rm -f "${validation_output}"
     echo "${ttl}"
   else
-    mv "${validation_output}" "${validation_output}"
     echo "${validation_output}"
   fi
 }
