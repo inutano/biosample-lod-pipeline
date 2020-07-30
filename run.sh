@@ -74,9 +74,9 @@ generate_biosample() {
   cd ${wdir}
 
   if [[ $# -gt 0 ]]; then
-    run_biosample=$(bash ./biosample/biosample.run.sh ${wdir} "test")
+    run_biosample=$(bash ./biosample/biosample.run.sh --test-run ${wdir})
   else
-    run_biosample=$(bash ./biosample/biosample.run.sh ${wdir})
+    run_biosample=$(bash ./biosample/biosample.run.sh --run ${wdir})
   fi
 
   echo "${wdir}/ttl"
@@ -94,12 +94,18 @@ generate_biosampleplus() {
   local wdir=${WORKDIR}/bsp
   git clone 'git://github.com/inutano/biosampleplus-pipeline' --depth 1 ${wdir}
   cd ${wdir}
-  run_biosampleplus=$(bash ./biosampleplus/biosampleplus.run.sh --run ${wdir})
+
+  if [[ $# -gt 0 ]]; then
+    run_biosampleplus=$(bash ./biosampleplus/biosampleplus.run.sh --test-run ${wdir})
+  else
+    run_biosampleplus=$(bash ./biosampleplus/biosampleplus.run.sh --run ${wdir})
+  fi
+
   echo "${wdir}/ttl"
 }
 
 test_generate_biosampleplus() {
-  local wdir=$(generate_biosampleplus)
+  local wdir=$(generate_biosampleplus "--test-run")
   test_ttl_generator "biosampleplus" ${wdir}
 }
 
