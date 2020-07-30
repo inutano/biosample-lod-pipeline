@@ -93,6 +93,7 @@ run() {
 }
 
 test_run() {
+  enable_debug_mode
   local xml_path=$(get_xml)
   create_jobconf ${xml_path}
   run_array_job ${xml_path} "test"
