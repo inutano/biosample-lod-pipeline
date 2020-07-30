@@ -5,7 +5,7 @@ WORKDIR_BASE="${HOME}/work"
 
 ### Functions
 message() {
-  case $2 in
+  case ${2} in
     green|success)
       COLOR="92m";
       ;;
@@ -22,19 +22,20 @@ message() {
       COLOR="0m"
       ;;
   esac
-  STARTCOLOR="\e[$COLOR";
-  ENDCOLOR="\e[0m";
-  printf "$STARTCOLOR%b$ENDCOLOR" "[$(date +'%Y/%m/%d %H:%M:%S')] $1";
+  STARTCOLOR="\e[${COLOR}"
+  ENDCOLOR="\e[0m"
+  printf "${STARTCOLOR}%b${ENDCOLOR}" "[$(date +'%Y/%m/%d %H:%M:%S')] ${1}" | tee -a ${LOGFILE}
 }
 
 #
 # Setup working directory and log file
 #
 setup() {
-  WORKDIR="${WORKDIR_BASE}/biosampleplus-pipeline/$(date +%Y%m%d-%H%M)"
+  PIPELINE_RUN_ID="bsp-$(date +%Y%m%d-%H%M)"
+  WORKDIR="${WORKDIR_BASE}/biosampleplus-pipeline/${PIPELINE_RUN_ID}"
   mkdir -p ${WORKDIR}
 
-  LOGFILE="${WORKDIR}/biosampleplus-pipeline.log"
+  LOGFILE="${WORKDIR}/biosampleplus-pipeline.${PIPELINE_RUN_ID}.log"
   touch ${LOGFILE}
 
   cd ${WORKDIR}
@@ -53,14 +54,14 @@ test_ttl_generator() {
   num_lines=$(wc -l ${wdir}/*ttl | sort -n | head)
 
   if [[ -z ${num_ttl_files} ]]; then
-    message "generate_${item_name}: FAILED\n" "danger" | tee -a ${LOGFILE}
-    message "  number of files: ${num_ttl_files}\n" | tee -a ${LOGFILE}
-    message "  number of lines (smallest 10 files):\n${num_lines}\n" | tee -a ${LOGFILE}
+    message "generate_${item_name}: FAILED\n" "danger"
+    message "  number of files: ${num_ttl_files}\n"
+    message "  number of lines (smallest 10 files):\n${num_lines}\n"
     FAILED+=(${item_name})
   else
-    message "generate_${item_name}: SUCCESS\n" "info" | tee -a ${LOGFILE}
-    message "  number of files: ${num_ttl_files}\n" | tee -a ${LOGFILE}
-    message "  number of lines (smallest 10 files):\n${num_lines}\n" | tee -a ${LOGFILE}
+    message "generate_${item_name}: SUCCESS\n" "info"
+    message "  number of files: ${num_ttl_files}\n"
+    message "  number of lines (smallest 10 files):\n${num_lines}\n"
   fi
 }
 
@@ -151,12 +152,12 @@ test_load_to_virtuoso() {
   local db_path=$(load_to_virtuoso)
   local db_size=$(ls -l ${db_path} | awk '{ print $5 }')
   if [[ ${db_size} -lt 70000000 ]]; then
-    message "load_to_virtuoso: FAILED\n" "danger" | tee -a ${LOGFILE}
-    message "  db size: ${db_size}\n" | tee -a ${LOGFILE}
+    message "load_to_virtuoso: FAILED\n" "danger"
+    message "  db size: ${db_size}\n"
     FAILED+=(load_to_virtuoso)
   else
-    message "load_to_virtuoso: SUCCESS\n" "info" | tee -a ${LOGFILE}
-    message "  db size: ${db_size}\n" | tee -a ${LOGFILE}
+    message "load_to_virtuoso: SUCCESS\n" "info"
+    message "  db size: ${db_size}\n"
   fi
 }
 
@@ -165,21 +166,31 @@ test_load_to_virtuoso() {
 #
 export_outputs() {
   local db_file="${WORKDIR}/virtuoso/virtuoso.db"
-  local dest_path="${WORKDIR}/dest"
-  echo "https://dbcls.rois.ac.jp"
+  local ttl_dir_org="${WORKDIR}/virtuoso/data"
+  local ttl_dir="${WORKDIR}/biosampleplus-${PIPELINE_RUN_ID}"
+  mv ${ttl_dir_org} ${ttl_dir}
+
+  local dest_path="/gpfs1/dpl1/ddbj-scfs/rdf/biosample"
+  local dest_vdb="/gpfs1/dpl1/ddbj-scfs/rdf/biosample/virtuosodb/biosampleplus.${PIPELINE_RUN_ID}.virtuoso.db"
+  local dest_ttl="/gpfs1/dpl1/ddbj-scfs/rdf/biosample/ttl/biosampleplus.${PIPELINE_RUN_ID}.ttl.tgz"
+
+  mkdir -p $(dirname ${dest_vdb}) && cp ${db_file} ${dest_vdb}
+  mkdir -p $(dirname ${dest_ttl}) && tar -zcf ${dest_ttl} ${ttl_dir}
+
+  echo "ftp://ftp.ddbj.nig.ac.jp/rdf/biosample/$(basename ${dest_vdb})"
 }
 
 test_export_outputs() {
   local dest_path=$(export_outputs)
   local dest_http_status=$(curl -s -o /dev/null -LI ${dest_path} -w '%{http_code}\n')
   local dest_file_size=$(curl -s -o /dev/null -LI ${dest_path} -w '%{size_download}\n')
-  if [[ ${dest_http_status} != 200 ]]; then
+  if [[ ${dest_http_status} != 350 ]]; then
     message "export_outputs: FAILED\n" "danger" | tee -a ${LOGFILE}
     message "  http status:      ${dest_http_status}\n" | tee -a ${LOGFILE}
     message "  remote file size: ${dest_file_size}\n" | tee -a ${LOGFILE}
     FAILED+=(export_outputs)
   else
-    message "mirror_virtuoso_db: SUCCESS\n" "info" | tee -a ${LOGFILE}
+    message "export_outputs: SUCCESS\n" "info" | tee -a ${LOGFILE}
     message "  remote file size: ${dest_file_size}\n" | tee -a ${LOGFILE}
   fi
 }
