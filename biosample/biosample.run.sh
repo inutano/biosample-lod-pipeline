@@ -37,17 +37,28 @@ run_array_job() {
   source "/home/geadmin/UGED/uged/common/settings.sh"
 
   local xml_path=${1}
+  local mode=${2}
   local logdir="${OUTDIR}/log" && mkdir -p ${logdir}
 
   find ${OUTDIR} -maxdepth 1 -type f -name "bs.*" | while read jobconf; do
     jobname=$(basename ${jobconf})
+
+    case ${mode} in
+      test)
+        local max=10
+        ;;
+      *)
+        local max=$(wc -l "${jobconf}" | awk '$0=$1')
+        ;;
+    esac
+
     qsub \
       -N "${jobname}" \
       -o  "${logdir}/${jobname}.log" \
       -pe def_slot 1 \
       -l s_vmem=4G \
       -l mem_req=4G \
-      -t 1-$(wc -l "${jobconf}" | awk '$0=$1'):1 \
+      -t 1-${max}:1 \
       "${JOB_SCRIPT}" \
       "${xml_path}" \
       "${jobconf}"
@@ -77,12 +88,15 @@ enable_debug_mode() {
 run() {
   local xml_path=$(get_xml)
   create_jobconf ${xml_path}
-  run_array_job ${xml_path}
+  run_array_job ${xml_path} "run"
   wait_uge
 }
 
 test_run() {
-  run
+  local xml_path=$(get_xml)
+  create_jobconf ${xml_path}
+  run_array_job ${xml_path} "test"
+  wait_uge
 }
 
 print_version() {
