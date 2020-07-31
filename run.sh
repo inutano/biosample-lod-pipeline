@@ -187,7 +187,7 @@ test_load_to_virtuoso() {
 # Publish virtuoso.db data file on the http-reachable storage
 #
 export_outputs() {
-  local db_file="${WORKDIR}/virtuoso/virtuoso.db"
+  local db_file="${WORKDIR}/virtuoso/db/virtuoso.db"
   local ttl_dir_org="${WORKDIR}/virtuoso/data"
   local ttl_dir="${WORKDIR}/biosampleplus-${PIPELINE_RUN_ID}"
   mv ${ttl_dir_org} ${ttl_dir}
