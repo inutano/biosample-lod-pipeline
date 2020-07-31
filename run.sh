@@ -88,6 +88,7 @@ generate_biosample() {
 test_generate_biosample() {
   local outdir=$(generate_biosample "--test-run")
   test_ttl_generator "biosample" ${outdir}
+  echo ${outdir}
 }
 
 #
@@ -109,8 +110,9 @@ generate_biosampleplus() {
 }
 
 test_generate_biosampleplus() {
-  local wdir=$(generate_biosampleplus "--test-run")
-  test_ttl_generator "biosampleplus" ${wdir}
+  local outdir=$(generate_biosampleplus "--test-run")
+  test_ttl_generator "biosampleplus" ${outdir}
+  echo ${outdir}
 }
 
 #
@@ -125,8 +127,9 @@ generate_accessions() {
 }
 
 test_generate_accessions() {
-  local wdir=$(generate_accessions)
-  test_ttl_generator "accessions" ${wdir}
+  local outdir=$(generate_accessions)
+  test_ttl_generator "accessions" ${outdir}
+  echo ${outdir}
 }
 
 #
@@ -141,8 +144,9 @@ generate_experiment() {
 }
 
 test_generate_experiment() {
-  local wdir=$(generate_experiment)
-  test_ttl_generator "experiment" ${wdir}
+  local outdir=$(generate_experiment)
+  test_ttl_generator "experiment" ${outdir}
+  echo ${outdir}
 }
 
 #
@@ -153,8 +157,10 @@ load_to_virtuoso() {
   git clone 'git://github.com/inutano/ttl2virtuosodb' -b 'v0.5.0' --depth 1 ${wdir}
   cd ${wdir}
 
+  rm -fr "${wdir}/data"
   mkdir -p "${wdir}/data"
-  find ${WORKDIR} -name 'ttl' -type d | while read ttl_dir; do
+
+  for ttl_dir in "${@}"; do
     find "${ttl_dir}" -name '*ttl' -type f | xargs mv -t "${wdir}/data"
   done
 
@@ -165,7 +171,7 @@ load_to_virtuoso() {
 }
 
 test_load_to_virtuoso() {
-  local db_path=$(load_to_virtuoso)
+  local db_path=$(load_to_virtuoso ${@})
   local db_size=$(ls -l ${db_path} | awk '{ print $5 }')
   if [[ ${db_size} -lt 70000000 ]]; then
     message "load_to_virtuoso: FAILED\n" "danger"
@@ -216,11 +222,11 @@ test_export_outputs() {
 #
 test() {
   setup
-  test_generate_biosample
-  test_generate_biosampleplus
-  test_generate_accessions
+  bs_ttl=$(test_generate_biosample)
+  bsp_ttl=$(test_generate_biosampleplus)
+  acc_ttl=$(test_generate_accessions)
   # test_generate_experiment
-  test_load_to_virtuoso
+  test_load_to_virtuoso ${bs_ttl} ${bsp_ttl} ${acc_ttl}
   test_export_outputs
 
   if [[ ${#FAILED[@]} -ne 0 ]]; then
@@ -235,11 +241,11 @@ test() {
 
 main() {
   setup
-  generate_biosample
-  generate_biosampleplus
-  generate_accessions
+  bs_ttl=$(generate_biosample)
+  bsp_ttl=$(generate_biosampleplus)
+  acc_ttl=$(generate_accessions)
   # generate_experiment # Under construction
-  load_to_virtuoso
+  load_to_virtuoso ${bs_ttl} ${bsp_ttl} ${acc_ttl}
   export_outputs
 }
 
