@@ -35,6 +35,8 @@ setup() {
   WORKDIR="${WORKDIR_BASE}/biosampleplus-pipeline/${PIPELINE_RUN_ID}"
   mkdir -p ${WORKDIR}
 
+  git clone 'git://github.com/inutano/biosampleplus-pipeline' --depth 1 "${WORKDIR}/pipeline"
+
   LOGFILE="${WORKDIR}/biosampleplus-pipeline.${PIPELINE_RUN_ID}.log"
   touch ${LOGFILE}
 
@@ -70,8 +72,9 @@ test_ttl_generator() {
 #
 generate_biosample() {
   local wdir=${WORKDIR}/biosample
-  git clone 'git://github.com/inutano/biosampleplus-pipeline' --depth 1 ${wdir}
-  cd ${wdir}
+  mkdir -p ${wdir}
+
+  cd "${WORKDIR}/pipeline"
 
   if [[ $# -gt 0 ]]; then
     run_biosample=$(bash ./biosample/biosample.run.sh --test-run ${wdir})
@@ -92,8 +95,9 @@ test_generate_biosample() {
 #
 generate_biosampleplus() {
   local wdir=${WORKDIR}/bsp
-  git clone 'git://github.com/inutano/biosampleplus-pipeline' --depth 1 ${wdir}
-  cd ${wdir}
+  mkdir -p ${wdir}
+
+  cd "${WORKDIR}/pipeline"
 
   if [[ $# -gt 0 ]]; then
     run_biosampleplus=$(bash ./biosampleplus/biosampleplus.run.sh --test-run ${wdir})

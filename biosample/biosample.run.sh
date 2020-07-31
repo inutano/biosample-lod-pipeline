@@ -144,7 +144,7 @@ main() {
         CMD="test_run"
         ;;
       *)
-        OUTDIR=$(cd $(dirname ${1}) && pwd -P)
+        OUTDIR=$(cd ${1} && pwd -P)
         TTL_DIR="${OUTDIR}/ttl"
         mkdir -p ${TTL_DIR}
         ;;
