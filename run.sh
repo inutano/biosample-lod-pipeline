@@ -199,11 +199,11 @@ export_outputs() {
   mkdir -p $(dirname ${dest_vdb}) && cp ${db_file} ${dest_vdb}
   mkdir -p $(dirname ${dest_ttl}) && tar -zcf ${dest_ttl} ${ttl_dir}
 
-  echo "ftp://ftp.ddbj.nig.ac.jp/rdf/biosample/$(basename ${dest_vdb})"
+  echo "ftp://ftp.ddbj.nig.ac.jp/rdf/biosample/virtuosodb/$(basename ${dest_vdb})"
 }
 
 test_export_outputs() {
-  local dest_path=$(export_outputs)
+  local dest_path=$(export_outputs | tail -n 1)
   local dest_http_status=$(curl -s -o /dev/null -LI ${dest_path} -w '%{http_code}\n')
   local dest_file_size=$(curl -s -o /dev/null -LI ${dest_path} -w '%{size_download}\n')
   if [[ ${dest_http_status} != 350 ]]; then
@@ -220,11 +220,18 @@ test_export_outputs() {
 #
 # Generalfunction
 #
+enable_debug_mode() {
+  N=$(date +%s%N)
+  PS4='+[$((($(date +%s%N)-${N})/1000000))ms][${BASH_SOURCE}:${LINENO}]: ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+  set -x
+}
+
 test() {
+  enable_debug_mode
   setup
-  bs_ttl=$(test_generate_biosample)
-  bsp_ttl=$(test_generate_biosampleplus)
-  acc_ttl=$(test_generate_accessions)
+  bs_ttl=$(test_generate_biosample | tail -n 1)
+  bsp_ttl=$(test_generate_biosampleplus | tail -n 1)
+  acc_ttl=$(test_generate_accessions | tail -n 1)
   # test_generate_experiment
   test_load_to_virtuoso ${bs_ttl} ${bsp_ttl} ${acc_ttl}
   test_export_outputs
@@ -241,9 +248,9 @@ test() {
 
 main() {
   setup
-  bs_ttl=$(generate_biosample)
-  bsp_ttl=$(generate_biosampleplus)
-  acc_ttl=$(generate_accessions)
+  bs_ttl=$(generate_biosample | tail -n 1)
+  bsp_ttl=$(generate_biosampleplus | tail -n 1)
+  acc_ttl=$(generate_accessions | tail -n 1)
   # generate_experiment # Under construction
   load_to_virtuoso ${bs_ttl} ${bsp_ttl} ${acc_ttl}
   export_outputs
