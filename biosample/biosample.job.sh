@@ -55,7 +55,7 @@ xml2ttl() {
     --rm \
     -e TZ=Asia/Tokyo \
     --volume ${TMPDIR}:/work \
-    "quay.io/inutano/biosample_jsonld:v1.8" \
+    "quay.io/inutano/biosample_jsonld:v1.11" \
     bs2ld \
     xml2ttl \
     /work/$(basename ${tmp_xml}) \
