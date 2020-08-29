@@ -6,6 +6,7 @@ PS4='+[$((($(date +%s%N)-${N})/1000000))ms][${BASH_SOURCE}:${LINENO}]: ${FUNCNAM
 set -eux
 
 module load docker
+BIOSAMPLE_RDF_DOCKER_IMAGE="quay.io/inutano/biosample_jsonld:v1.11"
 
 #
 # Functions
@@ -55,7 +56,7 @@ xml2ttl() {
     --rm \
     -e TZ=Asia/Tokyo \
     --volume ${TMPDIR}:/work \
-    "quay.io/inutano/biosample_jsonld:v1.11" \
+    ${BIOSAMPLE_RDF_DOCKER_IMAGE} \
     bs2ld \
     xml2ttl \
     /work/$(basename ${tmp_xml}) \
