@@ -120,9 +120,11 @@ test_generate_biosampleplus() {
 #
 generate_accessions() {
   local wdir=${WORKDIR}/accessions
-  git clone 'git://github.com/inutano/insdc-accessions' -b 'v1.3' --depth 1 ${wdir}
-  cd ${wdir}
-  run_accessions=$(bash ./bin/accessions-ttl-generator-split ${wdir})
+  mkdir -p ${wdir}
+
+  cd "${WORKDIR}/pipeline"
+  run_accessions=$(bash ./accessions/accessions-ttl-generator-split ${wdir})
+
   echo "${wdir}/ttl"
 }
 
