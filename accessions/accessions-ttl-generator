@@ -36,10 +36,10 @@ BEGIN {
   is_analysis=" a dra:Analysis ;"
 
   print "@prefix bs: <http://ddbj.nig.ac.jp/ontologies/biosample/> ."
-  is_biosample=" a bs:BioSample ;"
+  is_biosample=" a bs:BioSampleRecord ;"
 
   print "@prefix bp: <http://ddbj.nig.ac.jp/ontologies/bioproject/> ."
-  is_bioproject=" a bp:BioProject ;"
+  is_bioproject=" a bp:BioProjectRecord ;"
 
   print "@prefix dct: <http://purl.org/dc/terms/> ."
   id=" dct:identifier "
