@@ -44,8 +44,8 @@ BEGIN {
   print "@prefix dct: <http://purl.org/dc/terms/> ."
   id=" dct:identifier "
 
-  print "@prefix ido: <http://rdf.identifiers.org/ontology/> ."
-  link=" ido:link "
+  print "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> ."
+  link=" rdfs:seeAlso "
 
   print ""
 }
