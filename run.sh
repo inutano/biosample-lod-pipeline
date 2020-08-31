@@ -197,7 +197,7 @@ export_outputs() {
   local dest_ttl="/gpfs1/dpl1/ddbj-scfs/rdf/biosample/ttl/biosampleplus.${PIPELINE_RUN_ID}.ttl.tgz"
 
   mkdir -p $(dirname ${dest_vdb}) && cp ${db_file} ${dest_vdb}
-  mkdir -p $(dirname ${dest_ttl}) && tar -zcf ${dest_ttl} ${ttl_dir}
+  mkdir -p $(dirname ${dest_ttl}) && cd ${ttl_dir} && tar -zcf ${dest_ttl} .
 
   echo "ftp://ftp.ddbj.nig.ac.jp/rdf/biosample/virtuosodb/$(basename ${dest_vdb})"
 }
