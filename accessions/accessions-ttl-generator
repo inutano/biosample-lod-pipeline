@@ -1,0 +1,145 @@
+#!/usr/bin/env awk -f
+#
+# accessions-ttl-generator
+#  a script to generate RDF-TTL from SRA_Accessions file available at ftp.ncbi.nlm.nih.gov/reports/Metadata
+#  Author: Tazro Inutano Ohta inutano@gmail.com
+#  License: MIT
+#
+# Columns of input accessions file
+#  $1: SRA Accession ID
+#  $2: SRA Submission ID
+#  $11: SRA Experiment ID
+#  $12: SRA Sample ID
+#  $13: SRA Study ID
+#  $18: BioSample ID
+#  $19: BioProject ID
+#
+
+BEGIN {
+  FS=OFS="\t"
+
+  print "@prefix idsra: <http://identifiers.org/insdc.sra/> ."
+  idsra="idsra:"
+
+  print "@prefix idbs: <http://identifiers.org/biosample/> ."
+  idbs="idbs:"
+
+  print "@prefix idbp: <http://identifiers.org/bioproject/> ."
+  idbp="idbp:"
+
+  print "@prefix dra: <http://ddbj.nig.ac.jp/ontologies/dra/> ."
+  is_submission=" a dra:Submission ;"
+  is_experiment=" a dra:Experiment ;"
+  is_sample=" a dra:Sample ;"
+  is_study=" a dra:Study ;"
+  is_run=" a dra:Run ;"
+  is_analysis=" a dra:Analysis ;"
+
+  print "@prefix bs: <http://ddbj.nig.ac.jp/ontologies/biosample/> ."
+  is_biosample=" a bs:BioSample ;"
+
+  print "@prefix bp: <http://ddbj.nig.ac.jp/ontologies/bioproject/> ."
+  is_bioproject=" a bp:BioProject ;"
+
+  print "@prefix dct: <http://purl.org/dc/terms/> ."
+  id=" dct:identifier "
+
+  print "@prefix ido: <http://rdf.identifiers.org/ontology/> ."
+  link=" ido:link "
+
+  print ""
+}
+
+$0 ~ /^.RX/ {
+  print idsra $2 is_submission
+  print id "\"" $2 "\" ;"
+  print link idsra $1 " ;"
+  print link idsra $12 " ;"
+  print link idsra $13 " ;"
+  print link idbs $18 " ;"
+  print link idbp $19 " ."
+  print ""
+
+  print idsra $1 is_experiment
+  print id "\"" $1 "\" ;"
+  print link idsra $2 " ;"
+  print link idsra $12 " ;"
+  print link idsra $13 " ;"
+  print link idbs $18 " ;"
+  print link idbp $19 " ."
+  print ""
+
+  print idsra $12 is_sample
+  print id "\"" $12 "\" ;"
+  print link idsra $1 " ;"
+  print link idsra $2 " ;"
+  print link idsra $13 " ;"
+  print link idbs $18 " ;"
+  print link idbp $19 " ."
+  print ""
+
+  print idsra $13 is_study
+  print id "\"" $13 "\" ;"
+  print link idsra $1 " ;"
+  print link idsra $2 " ;"
+  print link idsra $12 " ;"
+  print link idbs $18 " ;"
+  print link idbp $19 " ."
+  print ""
+
+  print idbs $18 is_biosample
+  print id "\"" $18 "\" ;"
+  print link idsra $1 " ;"
+  print link idsra $2 " ;"
+  print link idsra $12 " ;"
+  print link idsra $13 " ;"
+  print link idbp $19 " ."
+  print ""
+
+  print idbp $19 is_bioproject
+  print id "\"" $19 "\" ;"
+  print link idsra $1 " ;"
+  print link idsra $2 " ;"
+  print link idsra $12 " ;"
+  print link idsra $13 " ;"
+  print link idbs $18 " ."
+  print ""
+}
+
+$0 ~ /^.RR/ {
+  print idsra $1 is_run
+  print id "\"" $1 "\" ;"
+  print link idsra $2 " ;"
+  print link idsra $11 " ;"
+  print link idsra $12 " ;"
+  print link idsra $13 " ;"
+  print link idbs $18 " ;"
+  print link idbp $19 " ."
+  print ""
+
+  print idsra $2 link idsra $1 " ."
+  print ""
+
+  print idsra $11 link idsra $1 " ."
+  print ""
+
+  print idsra $12 link idsra $1 " ."
+  print ""
+
+  print idsra $13 link idsra $1 " ."
+  print ""
+
+  print idbs $18 link idsra $1 " ."
+  print ""
+
+  print idbp  $19 link idsra $1 " ."
+  print ""
+}
+
+$0 ~ /^.RZ/ {
+  print idsra $1 is_analysis
+  print id "\"" $1 "\" ;"
+  print link idsra $2 " ."
+
+  print idsra $2 link idsra $1 " ."
+}

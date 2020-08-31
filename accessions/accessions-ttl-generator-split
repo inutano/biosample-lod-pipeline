@@ -1,0 +1,54 @@
+#!/bin/bash
+#
+# usage:
+#   ./accessions-ttl-generator-split [output directory]
+#
+set -e
+module load docker
+
+GENERATOR_PATH="$(cd $(dirname $0) && pwd -P)/accessions-ttl-generator"
+
+if [[ -z ${1} ]]; then
+  BASEDIR="$(cd $(dirname $0) && pwd -P)/.."
+else
+  mkdir -p "${1}"
+  BASEDIR="$(cd ${1} && pwd -P)"
+fi
+TMPDIR="/data1/tmp/biosample-lod/accessions/" && mkdir -p ${TMPDIR}
+OUTDIR="${BASEDIR}/ttl" && mkdir -p ${OUTDIR}
+
+INPUT_ACCESSIONS_TAB="${BASEDIR}/SRA_Accessions.tab"
+if [[ ! -e ${INPUT_ACCESSIONS_TAB} ]]; then
+  cd ${BASEDIR}
+  lftp -c "open ftp.ncbi.nlm.nih.gov/sra/reports/Metadata && pget -n 8 SRA_Accessions.tab"
+fi
+
+split -l 500000 ${INPUT_ACCESSIONS_TAB} ${TMPDIR}/accessions.
+find ${TMPDIR} -name "accessions.*" -type f | while read f; do
+  awk -f "${GENERATOR_PATH}" "${f}" | grep -v ':-' | grep -v '"-"' > "${TMPDIR}/$(basename ${f}).ttl" &
+  [ $( jobs | wc -l ) -ge $( nproc ) ] && wait ||:
+done
+wait
+
+#
+# Validate ttl
+#
+valid_value='Validator finished with 0 warnings and 0 errors.'
+find ${TMPDIR} -name "*ttl" -type f | while read ttl; do
+  validation_output="${ttl}.validation"
+
+  docker run --security-opt seccomp=unconfined --rm \
+    -v $(dirname "${ttl}"):/work \
+    "quay.io/inutano/turtle-validator:v1.0" \
+    ttl \
+    /work/$(basename "${ttl}") \
+    > "${validation_output}"
+
+  if [[ $(cat "${validation_output}") == "${valid_value}" ]]; then
+    rm -f "${validation_output}"
+  else
+    mv "${validation_output}" ${OUTDIR}
+  fi
+
+  mv ${ttl} ${OUTDIR}
+done
