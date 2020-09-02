@@ -6,7 +6,7 @@ PS4='+[$((($(date +%s%N)-${N})/1000000))ms][${BASH_SOURCE}:${LINENO}]: ${FUNCNAM
 set -eux
 
 module load docker
-METASRA_DOCKER_IMAGE="shikeda/metasra:1.5"
+METASRA_DOCKER_IMAGE="shikeda/metasra:1.6"
 
 #
 # Staging
