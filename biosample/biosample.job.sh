@@ -6,7 +6,7 @@ PS4='+[$((($(date +%s%N)-${N})/1000000))ms][${BASH_SOURCE}:${LINENO}]: ${FUNCNAM
 set -eux
 
 module load docker
-BIOSAMPLE_RDF_DOCKER_IMAGE="quay.io/inutano/biosample_jsonld:v1.14"
+BIOSAMPLE_RDF_DOCKER_IMAGE="quay.io/inutano/biosample_jsonld:v1.15"
 
 #
 # Functions
