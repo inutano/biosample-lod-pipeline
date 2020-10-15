@@ -27,7 +27,7 @@ OUT_TTL_PATH="${OUTDIR}/$(basename ${1}).ttl"
 download_script() {
   if [[ ! -e "${SCRIPT_LOCAL_PATH}" ]]; then
     mkdir -p $(dirname ${SCRIPT_LOCAL_PATH})
-    curl -s "${SCTIPT_REMOTE_PATH}" > "${SCRIPT_LOCAL_PATH}"
+    curl -sL "${SCTIPT_REMOTE_PATH}" > "${SCRIPT_LOCAL_PATH}"
   fi
 }
 
