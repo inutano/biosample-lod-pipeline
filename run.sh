@@ -236,8 +236,8 @@ test() {
   bs_ttl=$(test_generate_biosample | tail -n 1)
   bsp_ttl=$(test_generate_biosampleplus | tail -n 1)
   acc_ttl=$(test_generate_accessions | tail -n 1)
-  # test_generate_experiment
-  test_load_to_virtuoso ${bs_ttl} ${bsp_ttl} ${acc_ttl}
+  exp_ttl=$(test_generate_experiment | tail -n 1)
+  test_load_to_virtuoso ${bs_ttl} ${bsp_ttl} ${acc_ttl} ${exp_ttl}
   test_export_outputs
 
   if [[ ${#FAILED[@]} -ne 0 ]]; then
