@@ -12,7 +12,7 @@ source "/home/geadmin/UGED/uged/common/settings.sh"
 #
 FASTQ_DIR="/usr/local/resources/dra/fastq"
 JOB_SCRIPT_PATH="$(cd $(dirname "${0}") && pwd -P)/exp.job.sh"
-WORKDIR="$(cd $(dirname "${1}") && pwd -P)"
+WORKDIR="$(cd "${1}" && pwd -P)"
 JOBCONF_DIR="${WORKDIR}/jobconf"
 TTL_DIR="${WORKDIR}/ttl"
 UGE_LOG_DIR="${WORKDIR}/log"
