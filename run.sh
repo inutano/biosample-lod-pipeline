@@ -255,8 +255,8 @@ main() {
   bs_ttl=$(generate_biosample | tail -n 1)
   bsp_ttl=$(generate_biosampleplus | tail -n 1)
   acc_ttl=$(generate_accessions | tail -n 1)
-  # generate_experiment # Under construction
-  load_to_virtuoso ${bs_ttl} ${bsp_ttl} ${acc_ttl}
+  exp_ttl=$(generate_experiment | tail -n 1)
+  load_to_virtuoso ${bs_ttl} ${bsp_ttl} ${acc_ttl} ${exp_ttl}
   export_outputs
 }
 
