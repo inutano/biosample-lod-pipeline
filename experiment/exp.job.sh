@@ -23,7 +23,7 @@ DOCKER_IMAGE_TAG="python:3.9.0-buster"
 #
 download_script() {
   if [[ ! -e "${SCRIPT_PATH}" ]]; then
-    git clone --depth=1 "https://github.com/inutano/ld-sra" "/tmp"
+    git clone --depth=1 "https://github.com/inutano/ld-sra" "/tmp/ld-sra"
   fi
 }
 
@@ -35,7 +35,7 @@ xml2ttl() {
     ${DOCKER_IMAGE_TAG} \
     python \
     "/$(basename ${SCRIPT_PATH})" \
-    -l "/${JOBCONF_PATH}" \
+    -l "/$(basename ${JOBCONF_PATH})" \
     > "${OUT_TTL_PATH}"
 }
 
