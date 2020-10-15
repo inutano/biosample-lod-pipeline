@@ -11,8 +11,8 @@ source "/home/geadmin/UGED/uged/common/settings.sh"
 # Constants
 #
 FASTQ_DIR="/usr/local/resources/dra/fastq"
-JOB_SCRIPT_PATH="$(cd $(dirname $0) && pwd -P)/exp.job.sh"
-WORKDIR="$(cd $(dirname $0) && pwd -P)/../data/$(date "+%Y%m%d")"
+JOB_SCRIPT_PATH="$(cd $(dirname "${0}") && pwd -P)/exp.job.sh"
+WORKDIR="$(cd $(dirname "${1}") && pwd -P)"
 JOBCONF_DIR="${WORKDIR}/jobconf"
 TTL_DIR="${WORKDIR}/ttl"
 UGE_LOG_DIR="${WORKDIR}/log"
@@ -21,7 +21,6 @@ UGE_LOG_DIR="${WORKDIR}/log"
 # Functions
 #
 setup_dirs() {
-  mkdir -p "${WORKDIR}"
   mkdir -p "${JOBCONF_DIR}"
   mkdir -p "${TTL_DIR}"
   mkdir -p "${UGE_LOG_DIR}"
@@ -34,7 +33,7 @@ find_experiment_xml() {
   fi
 }
 
-submit_arrayjob() {
+submit_uge() {
   find ${JOBCONF_DIR} -name "exp.*" | sort | while read jobconf; do
     qsub -N "$(basename ${jobconf})" \
       -j y \
@@ -58,7 +57,7 @@ wait_uge_jobs() {
 run() {
   setup_dirs
   find_experiment_xml
-  submit_arrayjob
+  submit_uge
   wait_uge_jobs
 }
 

@@ -139,9 +139,11 @@ test_generate_accessions() {
 #
 generate_experiment() {
   local wdir=${WORKDIR}/experiment
-  git clone 'git://github.com/inutano/ld-sra' -b 'v1.4' --depth 1 ${wdir}
-  cd ${wdir}
-  run_experiment=$(bash ./sh/exp.run.sh ${wdir})
+  mkdir -p ${wdir}
+
+  cd "${WORKDIR}/pipeline"
+  run_experiment=$(bash ./experiment/exp.run.sh ${wdir})
+
   echo "${wdir}/ttl"
 }
 
