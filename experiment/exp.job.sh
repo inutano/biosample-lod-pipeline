@@ -63,6 +63,7 @@ validate_ttl() {
 }
 
 run() {
+  download_script
   xml2ttl
   validate_ttl
 }
