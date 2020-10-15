@@ -12,30 +12,37 @@ module load docker
 #
 # Constants
 #
+FASTQ_DIR="/usr/local/resources/dra/fastq"
+SCTIPT_REMOTE_PATH="https://github.com/inutano/ld-sra/raw/master/python/script/expxml2ttl.py"
+SCRIPT_LOCAL_PATH="/tmp/bsp/expxml2ttl.py"
+DOCKER_IMAGE_TAG="python:3.9.0-buster"
+
 JOBCONF_PATH="${1}"
 OUTDIR="${2}"
 OUT_TTL_PATH="${OUTDIR}/$(basename ${1}).ttl"
-SCRIPT_PATH="/tmp/ld-sra/python/script/expxml2ttl.py"
-DOCKER_IMAGE_TAG="python:3.9.0-buster"
 
 #
 # Functions
 #
 download_script() {
-  if [[ ! -e "${SCRIPT_PATH}" ]]; then
-    git clone --depth=1 "https://github.com/inutano/ld-sra" "/tmp/ld-sra"
+  if [[ ! -e "${SCRIPT_LOCAL_PATH}" ]]; then
+    mkdir -p $(dirname ${SCRIPT_LOCAL_PATH})
+    curl -s "${SCTIPT_REMOTE_PATH}" > "${SCRIPT_LOCAL_PATH}"
   fi
 }
 
 xml2ttl() {
+  local script_path_inside="/script.py"
+  local jobconf_path_inside="/job.conf"
   docker run --security-opt seccomp=unconfined --rm -i \
-    -v ${SCRIPT_PATH}:/$(basename ${SCRIPT_PATH}) \
-    -v ${JOBCONF_PATH}:/$(basename ${JOBCONF_PATH}) \
-    -v /usr/local/resources/dra/fastq:/usr/local/resources/dra/fastq \
+    -v ${SCRIPT_LOCAL_PATH}:${script_path_inside} \
+    -v ${JOBCONF_PATH}:${jobconf_path_inside} \
+    -v ${FASTQ_DIR}:${FASTQ_DIR} \
     ${DOCKER_IMAGE_TAG} \
     python \
-    "/$(basename ${SCRIPT_PATH})" \
-    -l "/$(basename ${JOBCONF_PATH})" \
+    ${script_path_inside} \
+    -l \
+    ${jobconf_path_inside} \
     > "${OUT_TTL_PATH}"
 }
 
