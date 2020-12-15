@@ -2,6 +2,7 @@
 
 ### Env Vars
 WORKDIR_BASE="${HOME}/work"
+FILESERVER_DIR_BASE="/gpfs1/dpl1/ddbj-scfs/rdf/biosample"
 
 ### Functions
 message() {
@@ -196,12 +197,14 @@ export_outputs() {
   local ttl_dir="${WORKDIR}/biosampleplus-${PIPELINE_RUN_ID}"
   mv ${ttl_dir_org} ${ttl_dir}
 
-  local dest_path="/gpfs1/dpl1/ddbj-scfs/rdf/biosample"
-  local dest_vdb="/gpfs1/dpl1/ddbj-scfs/rdf/biosample/virtuosodb/biosampleplus.${PIPELINE_RUN_ID}.virtuoso.db"
-  local dest_ttl="/gpfs1/dpl1/ddbj-scfs/rdf/biosample/ttl/biosampleplus.${PIPELINE_RUN_ID}.ttl.tgz"
+  local dest_vdb="${FILESERVER_DIR_BASE}/virtuosodb/biosampleplus.${PIPELINE_RUN_ID}.virtuoso.db"
+  local dest_ttl="${FILESERVER_DIR_BASE}/ttl/biosampleplus.${PIPELINE_RUN_ID}.ttl.tgz"
 
   mkdir -p $(dirname ${dest_vdb}) && cp ${db_file} ${dest_vdb}
   mkdir -p $(dirname ${dest_ttl}) && cd ${ttl_dir} && tar -zcf ${dest_ttl} .
+
+  rm -f $(ls -t ${FILESERVER_DIR_BASE}/virtuosodb/*virtuoso.db | awk 'NR > 3')
+  rm -f $(ls -t ${FILESERVER_DIR_BASE}/ttl/*ttl.tgz | awk 'NR > 3')
 
   echo "ftp://ftp.ddbj.nig.ac.jp/rdf/biosample/virtuosodb/$(basename ${dest_vdb})"
 }
