@@ -16,7 +16,7 @@ BIOSAMPLE_XML_REMOTE_PATH="ftp://ftp.ncbi.nlm.nih.gov/biosample/biosample_set.xm
 #
 xml2jsonline() {
   local xml_path=$(get_xml)
-  subset_xml_by_year ${xml_path} "2019" | sebset_xml_tags | awk_xml2jsonline
+  subset_xml_by_year ${xml_path} "2014" | sebset_xml_tags | awk_xml2jsonline
 }
 
 get_xml() {
