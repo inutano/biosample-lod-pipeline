@@ -38,13 +38,34 @@ setup() {
 
   git clone 'git://github.com/inutano/biosampleplus-pipeline' --depth 1 "${WORKDIR}/pipeline"
 
-  LOGFILE="${WORKDIR}/biosampleplus-pipeline.${PIPELINE_RUN_ID}.log"
+  LOGFILE="${WORKDIR}/${PIPELINE_RUN_ID}.log"
   touch ${LOGFILE}
 
   cd ${WORKDIR}
   message "Setup working directory: ${WORKDIR}\n"
   message "Setup log file: ${LOGFILE}\n"
 }
+
+test_setup() {
+  PIPELINE_RUN_ID="bsp-$(date +%Y%m%d-%H%M)"
+  WORKDIR="${WORKDIR_BASE}/biosampleplus-pipeline/${PIPELINE_RUN_ID}"
+  mkdir -p ${WORKDIR}
+
+  mkdir "${WORKDIR}/pipeline"
+  BASEDIR="$(cd $(dirname ${0}) && pwd -P)"
+  cp -r "${BASEDIR}/accessions" "${WORKDIR}/pipeline"
+  cp -r "${BASEDIR}/biosample" "${WORKDIR}/pipeline"
+  cp -r "${BASEDIR}/biosampleplus" "${WORKDIR}/pipeline"
+  cp -r "${BASEDIR}/experiment" "${WORKDIR}/pipeline"
+
+  LOGFILE="${WORKDIR}/${PIPELINE_RUN_ID}.log"
+  touch ${LOGFILE}
+
+  cd ${WORKDIR}
+  message "Setup working directory: ${WORKDIR}\n"
+  message "Setup log file: ${LOGFILE}\n"
+}
+
 
 #
 # Test ttl generator
@@ -96,7 +117,7 @@ test_generate_biosample() {
 # Create BioSamplePlus RDF: Run MetaSRA pipeline to map BioSample arrtibutes to ontologies
 #
 generate_biosampleplus() {
-  local wdir=${WORKDIR}/bsp
+  local wdir=${WORKDIR}/biosampleplus
   mkdir -p ${wdir}
 
   cd "${WORKDIR}/pipeline"
@@ -235,7 +256,7 @@ enable_debug_mode() {
 
 test() {
   enable_debug_mode
-  setup
+  test_setup
   bs_ttl=$(test_generate_biosample | tail -n 1)
   bsp_ttl=$(test_generate_biosampleplus | tail -n 1)
   acc_ttl=$(test_generate_accessions | tail -n 1)
